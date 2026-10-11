@@ -46,7 +46,7 @@ The benchmark reports permutation importance on the latest chronological holdout
 Python 3.10+ is recommended.
 
 ```powershell
-cd D:\Freelance\Nadee\research_project
+cd D:\Freelance\Nadee\research_project_simple
 python -m venv .venv_local
 .\.venv_local\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
@@ -65,3 +65,4 @@ Store one row per decision snapshot, with only fields known at that time: order/
 
 This is a research scaffold, not a production decision system. It does not invent individual operator records, validate sample costs, optimize live assignments, or claim causal effects. Before operational use, validate target definitions, data capture, cost assumptions, constraints, probability calibration, subgroup performance, and decision thresholds with factory IE/Quality/Finance stakeholders.
 "# Nadee" 
+
