@@ -121,10 +121,30 @@ def create_plots(artifact_dir: Path) -> list[Path]:
         fig.savefig(path, dpi=180, bbox_inches="tight")
         plt.close(fig)
         saved.append(path)
+
+    regression_folds_path = artifact_dir / "completion_days_fold_metrics.csv"
+    if regression_folds_path.exists():
+        folds = pd.read_csv(regression_folds_path)
+        if not folds.empty:
+            fig, ax = plt.subplots(figsize=(9, 5), constrained_layout=True)
+            for model, group in folds.groupby("model", sort=False):
+                ax.plot(group["fold_id"], group["mae_days"], marker="o", linewidth=2,
+                        label=str(model).replace("_", " "))
+            ax.set_xticks(sorted(folds["fold_id"].unique()))
+            ax.set_xlabel("Chronological validation fold")
+            ax.set_ylabel("Mean absolute error (days; lower is better)")
+            ax.set_title("Completion-time regression: validation MAE by fold", weight="bold")
+            ax.legend(frameon=True)
+            ax.grid(alpha=0.3)
+            path = plots_dir / "completion_days_mae_by_fold.png"
+            fig.savefig(path, dpi=180, bbox_inches="tight")
+            plt.close(fig)
+            saved.append(path)
     return saved
 
 
-def create_family_plots(board: pd.DataFrame, plots_dir: Path) -> list[Path]:
+def create_family_plots(board: pd.DataFrame, plots_dir: Path,
+                        fold_predictions: dict[str, list[dict]] | None = None) -> list[Path]:
     """Write concise, family-only plots into WORKING_<FAMILY>/plots."""
     plots_dir.mkdir(parents=True, exist_ok=True)
     if board.empty:
@@ -164,6 +184,86 @@ def create_family_plots(board: pd.DataFrame, plots_dir: Path) -> list[Path]:
     fig.savefig(path, dpi=180, bbox_inches="tight")
     plt.close(fig)
     saved.append(path)
+
+    # Fold-wise metrics are plotted instead of epochs: these models do not all train iteratively.
+    fold_predictions = fold_predictions or {}
+    family_models = board["model"].astype(str).tolist()
+    accuracy_rows, loss_rows = [], []
+    for model in family_models:
+        key = f"{family}::{model}"
+        for result in fold_predictions.get(key, []):
+            y_true = np.asarray(result["y"], dtype=int)
+            probability = np.clip(np.asarray(result["p"], dtype=float), 1e-12, 1 - 1e-12)
+            y_pred = (probability >= 0.5).astype(int)
+            accuracy_rows.append({"model": model, "fold_id": result["fold_id"],
+                                  "accuracy": float(np.mean(y_true == y_pred))})
+            loss = -np.mean(y_true * np.log(probability) + (1 - y_true) * np.log(1 - probability))
+            loss_rows.append({"model": model, "fold_id": result["fold_id"], "log_loss": float(loss)})
+
+    if accuracy_rows:
+        accuracy = pd.DataFrame(accuracy_rows)
+        fig, ax = plt.subplots(figsize=(8, 5), constrained_layout=True)
+        for model, group in accuracy.groupby("model", sort=False):
+            ax.plot(group["fold_id"], group["accuracy"], marker="o", linewidth=1.8,
+                    label=str(model).replace("_", " "))
+        ax.set_xticks(sorted(accuracy["fold_id"].unique()))
+        ax.set_ylim(0, 1)
+        ax.set_xlabel("Chronological validation fold")
+        ax.set_ylabel("Accuracy")
+        ax.set_title(f"{family.replace('_', ' ').title()}: validation accuracy by fold", weight="bold")
+        ax.legend(fontsize=8, frameon=True)
+        ax.grid(alpha=0.3)
+        path = plots_dir / "validation_accuracy_by_fold.png"
+        fig.savefig(path, dpi=180, bbox_inches="tight")
+        plt.close(fig)
+        saved.append(path)
+
+        losses = pd.DataFrame(loss_rows)
+        fig, ax = plt.subplots(figsize=(8, 5), constrained_layout=True)
+        for model, group in losses.groupby("model", sort=False):
+            ax.plot(group["fold_id"], group["log_loss"], marker="o", linewidth=1.8,
+                    label=str(model).replace("_", " "))
+        ax.set_xticks(sorted(losses["fold_id"].unique()))
+        ax.set_xlabel("Chronological validation fold")
+        ax.set_ylabel("Log loss (lower is better)")
+        ax.set_title(f"{family.replace('_', ' ').title()}: validation log loss by fold", weight="bold")
+        ax.legend(fontsize=8, frameon=True)
+        ax.grid(alpha=0.3)
+        path = plots_dir / "validation_log_loss_by_fold.png"
+        fig.savefig(path, dpi=180, bbox_inches="tight")
+        plt.close(fig)
+        saved.append(path)
+
+        # Every classifier gets its own out-of-fold confusion matrix.
+        for model in family_models:
+            heldout = fold_predictions.get(f"{family}::{model}", [])
+            if not heldout:
+                continue
+            matrix = np.zeros((2, 2), dtype=int)
+            for result in heldout:
+                y_true = np.asarray(result["y"], dtype=int)
+                y_pred = (np.asarray(result["p"], dtype=float) >= 0.5).astype(int)
+                for actual, predicted in zip(y_true, y_pred):
+                    matrix[actual, predicted] += 1
+            fig, ax = plt.subplots(figsize=(6.4, 5.4), constrained_layout=True)
+            image = ax.imshow(matrix, cmap="Greens")
+            ax.set_xticks([0, 1], ["Late (0)", "On time (1)"])
+            ax.set_yticks([0, 1], ["Late (0)", "On time (1)"])
+            ax.set_xlabel("Predicted")
+            ax.set_ylabel("Actual")
+            ax.set_title(f"{family.replace('_', ' ').title()} — on-time confusion matrix\n"
+                         f"Chronological out-of-fold; {model.replace('_', ' ')}")
+            threshold = matrix.max() / 2 if matrix.size else 0
+            for row in range(2):
+                for col in range(2):
+                    ax.text(col, row, str(matrix[row, col]), ha="center", va="center",
+                            color="white" if matrix[row, col] > threshold else "#222222", fontsize=12)
+            fig.colorbar(image, ax=ax, shrink=0.82, label="Order count")
+            safe_model = str(model).replace("/", "_").replace("\\", "_")
+            path = plots_dir / f"confusion_matrix__{safe_model}.png"
+            fig.savefig(path, dpi=180, bbox_inches="tight")
+            plt.close(fig)
+            saved.append(path)
     return saved
 
 

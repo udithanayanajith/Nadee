@@ -149,7 +149,7 @@ def benchmark(frame: pd.DataFrame, columns: list[str], families: list[str] | Non
     scores: list[dict] = []
     fold_predictions: dict[str, list[dict]] = {}
     families = families or ALL_FAMILIES
-    for train_idx, valid_idx in temporal_splits(frame):
+    for fold_id, (train_idx, valid_idx) in enumerate(temporal_splits(frame), start=1):
         raw_train, raw_valid = frame.iloc[train_idx].copy(), frame.iloc[valid_idx].copy()
         if raw_train[TARGET].nunique() < 2:
             continue
@@ -168,8 +168,8 @@ def benchmark(frame: pd.DataFrame, columns: list[str], families: list[str] | Non
                     fitted = clone(estimator).fit(train[cols], y_train)
                     p = fitted.predict_proba(valid[cols])[:, 1]
                     key = f"{family}::{name}"
-                    scores.append({"family": family, "model": name, "fold": len(scores), **metric_row(y_valid, p)})
-                    fold_predictions.setdefault(key, []).append({"y": y_valid.tolist(), "p": p.tolist()})
+                    scores.append({"family": family, "model": name, "fold": len(scores), "fold_id": fold_id, **metric_row(y_valid, p)})
+                    fold_predictions.setdefault(key, []).append({"fold_id": fold_id, "y": y_valid.tolist(), "p": p.tolist()})
                 except Exception as exc:
                     warnings.warn(f"Skipping {family}/{name}: {exc}")
     table = pd.DataFrame(scores)
@@ -195,16 +195,16 @@ def empirical_residual_radius(y_true: np.ndarray, y_pred: np.ndarray, coverage: 
     return radius, coverage
 
 
-def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[pd.DataFrame, float]:
+def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[pd.DataFrame, float, pd.DataFrame]:
     """Secondary capacity target; report chronological error and a demo conformal radius."""
     target = "target_actual_completion_days"
     if target not in frame:
-        return pd.DataFrame(), float("nan")
+        return pd.DataFrame(), float("nan"), pd.DataFrame()
     data = frame.copy()
     data[target] = pd.to_numeric(data[target], errors="coerce")
     data = data.dropna(subset=[target]).reset_index(drop=True)
     if len(data) <= 12:
-        return pd.DataFrame(), float("nan")
+        return pd.DataFrame(), float("nan"), pd.DataFrame()
     estimators = {
         "random_forest_regressor": RandomForestRegressor(n_estimators=250, min_samples_leaf=2, random_state=41),
         "extra_trees_regressor": ExtraTreesRegressor(n_estimators=250, min_samples_leaf=2, random_state=41),
@@ -212,7 +212,7 @@ def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[
         "knn_regressor": KNeighborsRegressor(n_neighbors=5, weights="distance"),
     }
     results, residual_y, residual_p = [], [], []
-    for train_idx, valid_idx in temporal_splits(data):
+    for fold_id, (train_idx, valid_idx) in enumerate(temporal_splits(data), start=1):
         train, valid = data.iloc[train_idx], data.iloc[valid_idx]
         for name, model in estimators.items():
             dense = name == "gradient_boosting_regressor"
@@ -221,7 +221,7 @@ def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[
             try:
                 estimator.fit(train[columns], train[target])
                 y, p = valid[target].to_numpy(dtype=float), estimator.predict(valid[columns])
-                results.append({"model": name, "mae_days": float(mean_absolute_error(y, p)),
+                results.append({"fold_id": fold_id, "model": name, "mae_days": float(mean_absolute_error(y, p)),
                                 "rmse_days": float(np.sqrt(mean_squared_error(y, p))),
                                 "r2": float(r2_score(y, p)) if len(y) > 1 else float("nan")})
                 if name == "random_forest_regressor":
@@ -231,10 +231,11 @@ def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[
                 warnings.warn(f"Skipping completion-days model {name}: {exc}")
     table = pd.DataFrame(results)
     if table.empty:
-        return table, float("nan")
+        return table, float("nan"), table
     radius, _ = empirical_residual_radius(np.asarray(residual_y), np.asarray(residual_p), coverage=0.9)
-    return (table.groupby("model", as_index=False).mean(numeric_only=True)
-            .sort_values("mae_days"), radius)
+    summary = (table.groupby("model", as_index=False).mean(numeric_only=True)
+               .drop(columns=["fold_id"], errors="ignore").sort_values("mae_days"))
+    return summary, radius, table
 
 
 def main() -> None:
@@ -253,11 +254,12 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     data = load_data(args.data)
     columns = feature_columns(data)
-    leaderboard, _ = benchmark(data, columns, active_families)
+    leaderboard, fold_predictions = benchmark(data, columns, active_families)
     leaderboard.to_csv(args.output / "leaderboard.csv", index=False)
-    regression_board, conformal_radius = benchmark_completion_days(data, columns)
+    regression_board, conformal_radius, regression_folds = benchmark_completion_days(data, columns)
     if not regression_board.empty:
         regression_board.to_csv(args.output / "completion_days_leaderboard.csv", index=False)
+        regression_folds.to_csv(args.output / "completion_days_fold_metrics.csv", index=False)
 
     best_family = str(leaderboard.iloc[0]["family"])
     best_model = str(leaderboard.iloc[0]["model"])
@@ -324,11 +326,11 @@ def main() -> None:
     }
     (args.output / "run_summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     plot_paths = create_plots(args.output)
-    if args.family == "all":
-        from plot_results import create_family_plots
-        for family in active_families:
-            folder = project_dir / FAMILY_FOLDERS[family]
-            create_family_plots(leaderboard[leaderboard["family"] == family], folder / "plots")
+    from plot_results import create_family_plots
+    for family in active_families:
+        folder = project_dir / FAMILY_FOLDERS[family]
+        create_family_plots(leaderboard[leaderboard["family"] == family], folder / "plots",
+                            fold_predictions=fold_predictions)
     print(leaderboard.to_string(index=False))
     print(f"\nSaved diagnostics to {args.output.resolve()}")
     print(f"Created {len(plot_paths)} comparison plots in { (args.output / 'plots').resolve() }")
