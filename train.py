@@ -241,13 +241,19 @@ def benchmark_completion_days(frame: pd.DataFrame, columns: list[str]) -> tuple[
 def main() -> None:
     parser = argparse.ArgumentParser(description="Chronological multimodel benchmark for apparel order acceptance")
     project_dir = Path(__file__).resolve().parent
-    parser.add_argument("--family", choices=["all"] + ALL_FAMILIES, default="all",
+    parser.add_argument("--family", choices=["all"] + ALL_FAMILIES + ["gnn"], default="all",
                         help="Train every runnable family, or only one family folder")
     parser.add_argument("--data", type=Path,
-                        default=project_dir / "dataset" / "Component4_ML_Training_Dataset_Synthetic_Sample.csv",
-                        help="Model-ready CSV; defaults to dataset/Component4_ML_Training_Dataset_Synthetic_Sample.csv")
+                        default=project_dir / "dataset" / "Component4_ML_Training_Dataset_Synthetic_1000.csv",
+                        help="Model-ready CSV; defaults to the 1,000-row synthetic demo dataset")
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--epochs", type=int, default=150,
+                        help="Epoch count for the GNN; ignored by the classical model families")
     args = parser.parse_args()
+    if args.family == "gnn":
+        from WORKING_GNN.train_gnn import run_gnn
+        run_gnn(args.data, epochs=args.epochs)
+        return
     active_families = ALL_FAMILIES if args.family == "all" else [args.family]
     if args.output is None:
         args.output = project_dir / "artifacts" if args.family == "all" else project_dir / FAMILY_FOLDERS[args.family]
@@ -331,6 +337,9 @@ def main() -> None:
         folder = project_dir / FAMILY_FOLDERS[family]
         create_family_plots(leaderboard[leaderboard["family"] == family], folder / "plots",
                             fold_predictions=fold_predictions)
+    if args.family == "all":
+        from WORKING_GNN.train_gnn import run_gnn
+        run_gnn(args.data, epochs=args.epochs)
     print(leaderboard.to_string(index=False))
     print(f"\nSaved diagnostics to {args.output.resolve()}")
     print(f"Created {len(plot_paths)} comparison plots in { (args.output / 'plots').resolve() }")

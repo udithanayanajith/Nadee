@@ -4,7 +4,7 @@ Research prototype for the supplied Component 4 proposal. It predicts order-leve
 
 ## Read this before interpreting results
 
-The provided CSV and workbook samples are labelled `SYNTHETIC_DEMO_ONLY`. They contain roughly 40 order snapshots, aggregate operator counts by grade, and no stable worker-operation history. They can demonstrate a pipeline, but cannot establish real factory accuracy, validate an allocation policy, or support individual-worker conflict detection. The project refuses to present a synthetic run as factory evidence. The placeholder intervention costs and grade rules in the workbook are not used as validated facts.
+The original sample CSV contains 40 synthetic order snapshots. The default training CSV contains 1,000 simulated rows generated from that sample's schema and plausible capacity rules; every row is labelled `SYNTHETIC_GENERATED_NOT_REAL_HISTORY`. Neither file contains genuine factory history. These datasets can demonstrate a pipeline, but cannot establish real factory accuracy, validate an allocation policy, or support individual-worker conflict detection.
 
 The primary target is `target_actual_on_time_0_1`. Completion quantity and completion days are future outcomes and are excluded from predictors. IDs, snapshot date, and data-source markers are also excluded. Evaluation uses chronological holdouts; performance on this small synthetic sample is diagnostic only. Do not use the output for operational order acceptance.
 
@@ -13,15 +13,16 @@ The primary target is `target_actual_on_time_0_1`. Completion quantity and compl
 - `WORKING_ML`: logistic regression, decision tree, random forest, extra trees, and gradient boosting.
 - `WORKING_KNN`: scaled nearest-neighbour classifier.
 - `WORKING_GRAPH`: relational context features built from shared style/line contexts. This is a graph-aware baseline, not a trained GNN.
+- `WORKING_GNN`: temporal GNN over order nodes, linked to up to eight prior orders sharing a line or style; predicts on-time completion and completion days.
 - `WORKING_KG`: interpretable style, line, machine, and workforce-context facts converted into decision-time graph features.
 - `WORKING_ENSEMBLE`: soft-voting blend of tabular models.
 - `WORKING_KG/aggregate_conflicts.py`: aggregate grade-level capacity conflict check; does not fabricate named operators.
 
-With pseudonymous operator IDs, operation-to-machine mappings, time-windowed assignments, and sufficient historical outcomes, the graph track can be extended to a heterogeneous GNN. The current aggregate grade counts do not encode operator-operation edges, so reporting a trained GNN here would be misleading. KNN is a classical ML baseline, not a deep-learning method.
+The current GNN models order-to-order context; it does not represent individual worker-operation assignments. Pseudonymous operator IDs, operation-to-machine mappings, time-windowed assignments, and sufficient outcomes are still needed for workforce allocation research. KNN is a classical ML baseline, not a deep-learning method.
 
 ## Simple folder layout
 
-Runnable families follow the `WORKING_*` layout of the reference project. Each family folder keeps its own `models/`, `plots/`, training entrypoint, and leaderboard. `WORKING_GNN/` is reserved with an explanation and empty output folders until real graph relationships are collected.
+Runnable families follow the `WORKING_*` layout of the reference project. Each family folder keeps its own `models/`, `plots/`, training entrypoint, and leaderboard.
 
 ```text
 research_project/
@@ -32,8 +33,8 @@ research_project/
 ├── WORKING_GRAPH/           # graph-context baseline and plots
 ├── WORKING_ML/              # logistic/tree/forest/boosting models and plots
 ├── WORKING_ENSEMBLE/        # soft-voting model and plots
-├── WORKING_GNN/             # reserved; needs operator-level graph data
-├── train.py                 # train all runnable families
+├── WORKING_GNN/             # temporal order graph GNN and plots
+├── train.py                 # train all runnable families including GNN
 └── requirements.txt
 ```
 
@@ -53,9 +54,19 @@ python -m pip install -r requirements.txt
 python train.py
 ```
 
-To train just one family, run its entrypoint, for example `python WORKING_KNN/training_with_plots_KNN.py` or `python WORKING_KG/training_with_plots_KG.py`.
+To regenerate the 1,000-row simulated CSV, run `python dataset/generate_synthetic_dataset.py`. To train one family, run its entrypoint, for example `python WORKING_KNN/training_with_plots_KNN.py`, `python WORKING_KG/training_with_plots_KG.py`, or `python train.py --family gnn`.
 
-The sample CSV is stored in `dataset/` and is selected automatically. Run `python train.py` to train all runnable families. Each `WORKING_*` folder receives that family's fitted models, leaderboard, and plots; the combined leaderboard and overall comparison plots are saved under `artifacts/`. The plots compare validation accuracy against log loss, probability scores, classification metrics, and completion-day errors. No acceptance threshold is applied. To use another CSV, pass `--data path\to\file.csv`. Replace the sample with de-identified real historical data before making research claims; never include names or direct identifiers.
+The 1,000-row synthetic CSV in `dataset/` is selected automatically. Run `python train.py` to train all runnable families, including the GNN. Each `WORKING_*` folder receives that family's fitted models and plots; combined comparisons are saved under `artifacts/`. Use `python train.py --data dataset/Component4_ML_Training_Dataset_Synthetic_Sample.csv` to run the original 40-row sample instead.
+
+### Training visualizations
+
+- `WORKING_*/plots/confusion_matrix__<model>.png`: one chronological out-of-fold confusion matrix per classifier.
+- `WORKING_*/plots/validation_accuracy_by_fold.png` and `validation_log_loss_by_fold.png`: validation trends for every classical classifier in that family.
+- `WORKING_GNN/plots/gnn_loss.png`, `gnn_accuracy.png`, `gnn_regression_mae.png`, and `gnn_confusion_on_time.png`: GNN epoch history plus its out-of-fold confusion matrix.
+- `artifacts/plots/completion_days_mae_by_fold.png`: completion-time regression MAE by chronological fold for each regressor.
+- `artifacts/plots/accuracy_vs_log_loss.png`, `classification_metrics_top10.png`, `probability_scores_all_models.png`, and `completion_days_errors.png`: overall model comparisons.
+
+Classical models use chronological validation folds rather than training epochs; the GNN has an epoch-based loss and metric history. The dataset has no quality-grade or crop target, so the project produces on-time confusion matrices. The 1,000-row file is simulated and must not be described as historical factory data or used as research evidence. Replace it with de-identified real production records before making research claims; never include names or direct identifiers.
 
 ## Data required for the real study
 
@@ -64,5 +75,4 @@ Store one row per decision snapshot, with only fields known at that time: order/
 ## Scope
 
 This is a research scaffold, not a production decision system. It does not invent individual operator records, validate sample costs, optimize live assignments, or claim causal effects. Before operational use, validate target definitions, data capture, cost assumptions, constraints, probability calibration, subgroup performance, and decision thresholds with factory IE/Quality/Finance stakeholders.
-"# Nadee" 
 
