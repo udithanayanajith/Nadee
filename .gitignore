@@ -23,7 +23,7 @@ Thumbs.db
 
 # Project generated artifacts
 models/
-plots/
+
 data/*.csv
 
 # Optional: keep a placeholder if needed
