@@ -24,7 +24,7 @@ Thumbs.db
 # Project generated artifacts
 models/
 
-data/*.csv
+
 
 # Optional: keep a placeholder if needed
 # !models/.gitkeep
