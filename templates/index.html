@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Component 4 - Order Acceptance</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+        .container { max-width:800px; margin:auto; background:#fff; padding:30px;
+                     border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+        h1 { color:#1a3d5c; }
+        label { display:block; margin-top:12px; font-weight:600; color:#333; }
+        input, select { width:100%; padding:8px; border:1px solid #ccc;
+                        border-radius:6px; margin-top:4px; }
+        button { margin-top:20px; background:#1a73e8; color:#fff; border:none;
+                 padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; }
+        button:hover { background:#0d5dc4; }
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧵 Smart Apparel - Order Acceptance</h1>
+    <p>📋 Enter order & resource details to predict fulfilment and recommended intervention.</p>
+
+    <form action="/predict" method="POST">
+        <div class="grid">
+            <div>
+                <label>Order Quantity</label>
+                <input type="number" name="order_quantity" value="10000" required>
+            </div>
+            <div>
+                <label>Handover Days</label>
+                <input type="number" name="handover_days" value="10" required>
+            </div>
+            <div>
+                <label>SMV (minutes)</label>
+                <input type="number" step="0.01" name="required_smv_total" value="12.5" required>
+            </div>
+            <div>
+                <label>Order Value (LKR)</label>
+                <input type="number" step="0.01" name="order_value" value="2500000" required>
+            </div>
+            <div>
+                <label>Style</label>
+                <select name="style">
+                    <option>Polo</option><option>T-Shirt</option>
+                    <option>Hoodie</option><option>Legging</option><option>Jacket</option>
+                </select>
+            </div>
+            <div>
+                <label>Priority</label>
+                <select name="priority">
+                    <option>Low</option><option selected>Normal</option><option>High</option>
+                </select>
+            </div>
+            <div>
+                <label>Existing Allocation Conflicts</label>
+                <input type="number" name="n_conflicts" value="2">
+            </div>
+            <div>
+                <label>Avg Worker Efficiency (%)</label>
+                <input type="number" step="0.1" name="avg_worker_eff" value="72">
+            </div>
+            <div>
+                <label>Distinct Workers Available</label>
+                <input type="number" name="distinct_workers" value="18">
+            </div>
+            <div>
+                <label>Distinct Machines</label>
+                <input type="number" name="distinct_machines" value="12">
+            </div>
+            <div>
+                <label>Active Allocations</label>
+                <input type="number" name="active_allocs" value="4">
+            </div>
+            <div>
+                <label>Availability Rate (0-1)</label>
+                <input type="number" step="0.01" name="availability_rate" value="0.75">
+            </div>
+        </div>
+        <button type="submit">Predict Order Feasibility</button>
+    </form>
+</div>
+</body>
+</html>

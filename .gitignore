@@ -1,6 +1,30 @@
-.venv/
-.venv_local/
-.runtime_packages/
-artifacts/
+# Python cache
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project generated artifacts
+models/
+plots/
+data/*.csv
+
+# Optional: keep a placeholder if needed
+# !models/.gitkeep

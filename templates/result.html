@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+        .container { max-width:900px; margin:auto; background:#fff; padding:30px;
+                     border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+        h1, h2 { color:#1a3d5c; }
+        .badge { display:inline-block; padding:8px 18px; border-radius:20px;
+                 font-weight:700; color:#fff; font-size:18px; }
+        .ACCEPT { background:#28a745; }
+        .INTERV { background:#f0ad4e; }
+        .RISKY { background:#fd7e14; }
+        .REJECT { background:#dc3545; }
+        table { width:100%; border-collapse:collapse; margin-top:12px; }
+        th, td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+        th { background:#f4f6f8; }
+        .explain li { margin:6px 0; }
+        .prob { font-size:26px; font-weight:700; color:#1a73e8; }
+        a.btn { display:inline-block; margin-top:20px; padding:10px 18px;
+                background:#1a73e8; color:#fff; border-radius:6px;
+                text-decoration:none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 Order Feasibility Result</h1>
+
+    <p>📈 Probability of On-Time Completion:
+        <span class="prob">{{ p_ontime }}%</span></p>
+
+    <p>✅ Final Decision:
+        <span class="badge
+            {% if decision.startswith('ACCEPT') %}ACCEPT
+            {% elif decision.startswith('ACCEPT WITH') %}INTERV
+            {% elif decision.startswith('RISKY') %}RISKY
+            {% else %}REJECT{% endif %}">
+            {{ decision }}
+        </span>
+    </p>
+
+    {% if best %}
+    <h2>🏆 Recommended Minimum-Cost Intervention</h2>
+    <p>🎯 <b>{{ best.scenario }}</b> — Cost: <b>LKR {{ "{:,.0f}".format(best.cost) }}</b>
+       (P(Selected) = {{ best.p_selected }})</p>
+    {% endif %}
+
+    <h2>📊 Scenario Comparison</h2>
+    <table>
+        <tr>
+            <th>Scenario</th><th>+Workers</th><th>OT (h)</th>
+            <th>+Machines</th><th>Outsourced Qty</th>
+            <th>P(Selected)</th><th>Cost (LKR)</th>
+        </tr>
+        {% for s in scenarios %}
+        <tr>
+            <td>{{ s.scenario }}</td>
+            <td>{{ s.added_workers }}</td>
+            <td>{{ s.overtime_hours }}</td>
+            <td>{{ s.added_machines }}</td>
+            <td>{{ s.outsourced_qty }}</td>
+            <td>{{ s.p_selected }}</td>
+            <td>{{ "{:,.0f}".format(s.cost) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>🔍 Explanation</h2>
+    <ul class="explain">
+        {% for e in explanation %}<li>💡 {{ e }}</li>{% endfor %}
+    </ul>
+
+    <a class="btn" href="/">🏠 New Prediction</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+(pytorch-cuda) D:\Freelance\Nadee\garment_order_system>python compare_models.py
+2026-10-13 18:49:25.536438: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+
+🚀 Training N1 models...
+  → DNN
+2026-10-13 18:49:30.656776: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+  → Decision Tree
+  → Random Forest
+  → Gradient Boosting (sklearn)
+  → XGBoost
+  → LightGBM
+  → GANN (this takes ~1-2 min)
+     GANN best config: {'hidden': [123, 62, 8], 'dropout': 0.4916154429033941, 'lr': 0.0011653978525847418, 'epochs': 14}
+
+🏆 Best N1 model: DNN  (ROC-AUC = 0.8411)
+
+🚀 Training N2 models...
+  → Decision Tree
+  → Random Forest
+  → Gradient Boosting
+  → XGBoost
+  → LightGBM
+
+🏆 Best N2 model: Gradient Boosting  (ROC-AUC = 0.9574)
+💰 Best cost model: RandomForest (R² = 0.985)
+
+=================================================================
+📊 FINAL RESULTS
+=================================================================
+
+N1 — Best: DNN
+                   accuracy  precision  recall      f1  roc_auc
+DNN                  0.7937     0.8382   0.912  0.8736   0.8411
+GANN                 0.8063     0.8790   0.872  0.8755   0.8386
+Random Forest        0.8000     0.8550   0.896  0.8750   0.8094
+Gradient Boosting    0.7750     0.8504   0.864  0.8571   0.8018
+XGBoost              0.8000     0.8720   0.872  0.8720   0.7966
+LightGBM             0.8000     0.8661   0.880  0.8730   0.7925
+Decision Tree        0.7688     0.8548   0.848  0.8514   0.6553
+
+N2 — Best: Gradient Boosting
+                   accuracy  precision  recall      f1  roc_auc
+Gradient Boosting    0.9344     0.7914  0.7639  0.7774   0.9574
+XGBoost              0.9323     0.7926  0.7431  0.7670   0.9564
+DNN                  0.9406     0.8655  0.7153  0.7833   0.9559
+LightGBM             0.9375     0.8231  0.7431  0.7810   0.9523
+Random Forest        0.9365     0.8217  0.7361  0.7766   0.9516
+Decision Tree        0.9240     0.7669  0.7083  0.7365   0.8969
+
+✅ Comparison complete. Best models saved.
+
+(pytorch-cuda) D:\Freelance\Nadee\garment_order_system>
