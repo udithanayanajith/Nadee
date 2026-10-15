@@ -1,151 +1,151 @@
 worker_id,grade,experience_months,training_status,attendance_rate,availability_status,machine_skills,efficiency_avg,quality_avg,rework_rate,previous_output
-1,B,52,Trained,87.6,Available,Buttonhole,65.53,80.34,1.23,98
-2,B,74,Untrained,87.79,Available,"Overlock, Kansai",65.64,80.04,4.54,51
-3,A,67,Trained,97.32,Allocated,"Overlock, Buttonhole, Kansai",80.45,81.13,2.39,332
-4,B,108,Untrained,87.29,Available,"Buttonhole, Flatlock, Kansai",71.36,74.06,1.66,134
-5,B,46,Trained,93.16,Available,"Overlock, SNLS",75.3,79.41,2.74,94
-6,Jumper,72,Trained,99.62,Allocated,"Bartack, Kansai",97.61,98.0,3.79,50
-7,A+,60,Trained,92.14,Available,"Kansai, SNLS, Overlock",90.32,94.22,1.59,102
-8,Jumper,38,Trained,97.22,Available,"Kansai, Bartack, SNLS",86.04,100.0,1.68,62
-9,B,142,Trained,90.79,Available,"Kansai, Buttonhole, Flatlock",74.6,78.98,1.16,98
-10,B,82,Trained,92.74,Available,Flatlock,69.53,74.07,0.63,157
-11,A+,52,Trained,99.33,Available,Flatlock,83.38,88.67,2.74,104
-12,B,170,Untrained,100.0,Leave,"SNLS, Buttonhole",62.16,78.72,4.82,210
-13,C,40,Trained,98.33,Leave,Kansai,51.95,70.0,2.16,96
-14,A,159,Untrained,89.04,Allocated,"Kansai, SNLS, Overlock",83.73,85.4,5.87,296
-15,A+,119,Trained,100.0,Available,Overlock,90.22,100.0,3.12,259
-16,B,88,Trained,88.41,Available,Buttonhole,72.93,84.32,2.08,87
-17,A,96,Untrained,99.25,Available,"Kansai, Buttonhole, Flatlock",76.71,84.25,1.83,206
-18,Jumper,144,Trained,87.42,Available,SNLS,88.51,100.0,2.68,169
-19,Jumper,27,Trained,86.97,Available,"Bartack, Flatlock",95.18,98.56,1.51,191
-20,C,74,Untrained,98.85,Available,"SNLS, Bartack",56.52,70.0,2.18,356
-21,A,92,Trained,81.92,Available,"Overlock, Bartack, Kansai",79.05,87.65,2.71,235
-22,A+,44,Trained,100.0,Allocated,"Bartack, Flatlock, Buttonhole",81.3,95.43,4.12,373
-23,C,59,Trained,96.87,Allocated,"Bartack, Flatlock",58.4,70.21,4.41,274
-24,A,11,Untrained,94.53,Allocated,"Buttonhole, Overlock",88.33,89.23,5.77,239
-25,C,32,Trained,83.8,Available,"Bartack, Kansai, Buttonhole",62.64,70.0,1.82,293
-26,B,131,Trained,92.48,Allocated,"Kansai, SNLS, Overlock",77.69,74.86,6.55,76
-27,A,35,Trained,93.28,Available,Flatlock,79.2,87.03,2.81,326
-28,B,45,Trained,93.44,Available,Kansai,72.74,79.31,2.98,87
-29,B,8,Trained,92.64,Available,SNLS,82.12,85.45,6.39,242
-30,Jumper,34,Trained,94.87,Allocated,"Overlock, Bartack, SNLS",94.95,95.37,3.84,234
-31,Jumper,38,Trained,93.88,Available,"Buttonhole, Flatlock, Kansai",90.86,100.0,1.58,361
-32,A,103,Trained,95.33,Allocated,"Overlock, Buttonhole",85.39,83.37,4.25,249
-33,B,124,Trained,96.13,Available,"Bartack, Flatlock, Buttonhole",73.17,84.66,2.75,294
-34,A,114,Trained,90.11,Available,Overlock,74.71,89.04,3.44,133
-35,A,42,Trained,90.83,Allocated,"Bartack, Flatlock",78.98,80.72,5.49,307
-36,Jumper,16,Untrained,90.04,Available,"Buttonhole, Kansai",93.1,100.0,3.59,118
-37,A+,112,Trained,93.72,Available,"Flatlock, Bartack, Kansai",97.21,96.92,1.5,330
-38,B,34,Untrained,96.46,Available,Overlock,71.3,81.47,2.31,193
-39,A+,126,Trained,92.71,Allocated,"Overlock, Buttonhole, Kansai",88.77,93.32,4.74,313
-40,C,106,Trained,92.28,Available,SNLS,66.99,70.84,4.62,335
-41,C,127,Trained,92.5,Available,Bartack,58.11,74.85,3.07,375
-42,A,61,Untrained,91.38,Available,"Kansai, Flatlock, Overlock",80.0,88.21,3.82,180
-43,B,155,Trained,94.71,Allocated,"Overlock, Bartack",77.66,85.79,2.65,178
-44,B,67,Trained,87.55,Available,"SNLS, Buttonhole, Bartack",66.15,83.24,5.65,357
-45,A,27,Trained,94.66,Allocated,"SNLS, Buttonhole",83.19,94.79,3.97,203
-46,A,171,Trained,91.42,Allocated,Buttonhole,72.23,88.56,1.68,377
-47,A+,131,Trained,88.47,Available,"SNLS, Bartack, Flatlock",87.54,100.0,3.17,63
-48,A,7,Trained,89.4,Available,"Kansai, Buttonhole, SNLS",82.23,81.11,3.62,259
-49,C,175,Trained,100.0,Available,"Flatlock, Kansai, Buttonhole",66.93,71.66,2.68,93
-50,B,144,Trained,92.02,Available,"Kansai, Overlock, SNLS",71.1,82.49,1.91,207
-51,A,90,Trained,91.08,Available,"Kansai, Bartack, Buttonhole",74.66,89.38,1.86,166
-52,A+,77,Trained,89.94,Available,"SNLS, Buttonhole",85.68,89.89,4.37,191
-53,A,4,Trained,95.73,Available,"Bartack, Overlock",71.57,91.66,2.3,364
-54,B,95,Trained,86.65,Allocated,"Bartack, Buttonhole",72.25,79.23,4.63,284
-55,Jumper,94,Trained,91.42,Allocated,"Kansai, Flatlock",93.63,93.35,1.27,124
-56,A+,34,Untrained,87.56,Available,"Bartack, Overlock, Kansai",88.23,90.5,3.84,299
-57,Jumper,54,Trained,97.18,Available,Flatlock,97.77,95.86,1.8,204
-58,A,155,Untrained,98.27,Available,Overlock,85.73,93.09,3.52,362
-59,C,149,Trained,93.74,Available,"Bartack, Buttonhole, SNLS",60.36,70.0,3.71,227
-60,B,12,Trained,93.54,Available,Flatlock,72.34,84.55,2.87,373
-61,C,59,Untrained,86.07,Available,"Flatlock, SNLS, Kansai",63.37,70.0,2.93,221
-62,Jumper,168,Trained,94.02,Available,"Overlock, Flatlock",100.0,100.0,3.61,67
-63,A,98,Trained,96.22,Allocated,Kansai,85.54,90.27,3.22,320
-64,C,155,Trained,94.41,Allocated,SNLS,60.81,70.0,0.76,339
-65,B,11,Trained,94.6,Allocated,Buttonhole,67.9,82.82,0.5,290
-66,Jumper,107,Untrained,93.93,Allocated,"SNLS, Bartack",90.92,100.0,0.81,362
-67,Jumper,159,Trained,97.86,Available,"Kansai, Buttonhole, Flatlock",92.82,100.0,1.06,201
-68,Jumper,98,Trained,99.78,Allocated,"Buttonhole, Flatlock",99.17,94.83,5.01,55
-69,A,150,Trained,87.0,Available,"Buttonhole, Flatlock, Kansai",71.86,86.58,5.14,354
-70,A,174,Trained,90.77,Available,"Bartack, Overlock, SNLS",77.88,89.56,5.42,225
-71,A,112,Trained,95.0,Available,"Kansai, Overlock, Bartack",82.48,90.54,0.5,232
-72,Jumper,12,Trained,85.89,Available,Bartack,100.0,100.0,1.76,57
-73,B,113,Trained,98.56,Allocated,"Flatlock, Overlock",76.15,80.28,4.27,252
-74,A+,26,Trained,94.87,Available,"Overlock, Buttonhole, SNLS",94.55,88.74,3.36,325
-75,C,153,Trained,92.5,Allocated,"Bartack, Kansai",60.63,70.0,2.07,249
-76,B,175,Trained,98.04,Available,Overlock,65.67,86.51,1.07,263
-77,A,8,Trained,91.62,Available,"Bartack, SNLS, Flatlock",82.32,86.67,1.16,215
-78,A,41,Trained,92.66,Available,Overlock,81.69,87.49,2.6,384
-79,A,46,Trained,92.42,Allocated,"SNLS, Kansai, Flatlock",74.71,90.49,3.32,302
-80,B,158,Trained,88.6,Available,"SNLS, Bartack",74.82,82.74,1.77,391
-81,B,55,Trained,92.88,Allocated,Buttonhole,74.79,72.45,2.59,292
-82,C,150,Trained,92.92,Available,"Bartack, Kansai, SNLS",63.31,70.0,3.46,102
-83,A,106,Trained,92.27,Allocated,"Bartack, Buttonhole, Overlock",87.08,95.37,3.52,161
-84,A+,63,Trained,86.93,Available,"SNLS, Buttonhole",87.19,86.47,2.8,61
-85,A+,131,Trained,94.58,Available,Buttonhole,86.2,91.05,4.68,264
-86,C,161,Trained,93.59,Allocated,Kansai,61.47,70.0,1.73,203
-87,C,51,Trained,96.56,Allocated,"Bartack, Buttonhole",62.97,70.0,3.6,50
-88,A,161,Trained,92.87,Allocated,"SNLS, Buttonhole, Kansai",72.25,91.75,3.34,344
-89,A,20,Trained,97.98,Allocated,SNLS,81.91,92.1,2.96,242
-90,B,26,Trained,84.96,Allocated,"Flatlock, Bartack, Kansai",75.85,87.01,4.09,168
-91,A,70,Untrained,98.19,Available,Flatlock,75.88,79.59,2.14,86
-92,C,88,Untrained,89.03,Available,"Overlock, Kansai, Flatlock",54.48,70.98,0.5,81
-93,B,139,Trained,92.15,Available,"Buttonhole, Kansai",72.85,79.86,1.66,138
-94,B,158,Untrained,95.0,Available,"SNLS, Buttonhole",71.49,80.15,1.82,254
-95,B,111,Trained,85.15,Available,SNLS,67.16,80.76,2.18,389
-96,A,55,Trained,94.39,Leave,"Kansai, Flatlock, Bartack",78.1,89.25,2.86,192
-97,B,34,Trained,92.04,Allocated,Overlock,76.53,70.0,3.9,162
-98,B,47,Trained,88.61,Allocated,"Bartack, Kansai",79.05,80.13,5.12,273
-99,B,6,Trained,88.96,Available,SNLS,75.34,88.29,4.84,257
-100,C,8,Trained,96.96,Available,"Bartack, Kansai",62.98,74.3,3.74,198
-101,B,149,Trained,93.52,Allocated,"Kansai, Buttonhole",77.17,73.11,2.88,299
-102,A,54,Trained,90.82,Available,"Bartack, SNLS, Kansai",79.78,80.23,3.0,341
-103,A,170,Trained,86.73,Allocated,"Flatlock, Bartack, Buttonhole",84.69,87.74,1.5,160
-104,A+,109,Untrained,94.42,Available,"Bartack, Buttonhole, SNLS",87.61,93.94,4.23,239
-105,Jumper,101,Trained,87.65,Available,Kansai,87.76,93.55,4.55,337
-106,A,158,Trained,94.27,Available,"Bartack, Flatlock, Buttonhole",83.62,87.45,3.73,94
-107,A+,131,Trained,90.55,Available,"Flatlock, Buttonhole, Kansai",95.32,93.1,2.58,222
-108,C,132,Trained,99.69,Available,"Kansai, SNLS, Overlock",59.97,76.04,2.72,151
-109,A,54,Trained,83.69,Available,Bartack,72.74,80.86,4.62,330
-110,C,174,Trained,86.53,Available,Buttonhole,57.53,74.79,4.35,197
-111,B,29,Trained,88.3,Available,"SNLS, Flatlock",67.1,79.96,2.38,276
-112,C,16,Trained,97.22,Allocated,"Flatlock, Kansai",51.76,74.31,1.07,372
-113,C,20,Trained,89.95,Allocated,"Flatlock, Overlock, Kansai",63.22,75.1,2.42,165
-114,A,79,Trained,83.94,Available,"Overlock, Flatlock, Buttonhole",74.94,83.28,2.13,353
-115,A+,51,Untrained,88.78,Allocated,"Buttonhole, Flatlock, Overlock",92.72,95.43,4.05,328
-116,C,173,Trained,86.28,Available,"Kansai, Overlock, Buttonhole",59.88,70.0,4.11,353
-117,C,140,Untrained,89.48,Allocated,Overlock,60.14,70.0,1.48,225
-118,B,110,Trained,98.99,Available,"Overlock, Buttonhole, Kansai",77.72,78.98,4.31,245
-119,A+,96,Untrained,93.89,Available,Bartack,91.61,90.1,4.36,351
-120,B,178,Trained,89.71,Allocated,"Flatlock, Buttonhole, Overlock",78.53,80.96,1.25,134
-121,A+,49,Untrained,99.96,Available,"SNLS, Bartack",89.55,94.25,2.68,95
-122,C,155,Trained,83.46,Leave,SNLS,63.17,70.0,0.5,177
-123,A+,34,Untrained,99.98,Allocated,"Flatlock, Overlock",84.86,100.0,3.46,81
-124,Jumper,93,Trained,92.85,Allocated,Buttonhole,99.12,100.0,3.21,177
-125,A,171,Trained,91.53,Available,Bartack,77.17,86.06,2.33,202
-126,A,19,Trained,100.0,Available,"SNLS, Kansai, Buttonhole",78.79,81.65,1.69,283
-127,A,21,Trained,91.91,Available,Kansai,79.4,94.06,2.95,236
-128,A+,50,Untrained,97.46,Available,Flatlock,79.31,96.61,4.68,224
-129,A,20,Untrained,87.01,Available,"SNLS, Bartack",83.12,95.22,2.36,140
-130,B,128,Untrained,100.0,Allocated,"Kansai, SNLS",65.88,76.43,3.58,295
-131,A,54,Trained,94.29,Available,"Overlock, Kansai, SNLS",75.28,93.53,1.43,144
-132,B,134,Trained,91.12,Available,Overlock,70.81,84.71,2.88,313
-133,B,63,Trained,95.6,Available,"Bartack, Overlock, Kansai",64.07,82.52,2.08,312
-134,C,66,Trained,98.53,Allocated,"Bartack, Overlock, Kansai",63.89,70.0,1.03,288
-135,Jumper,71,Untrained,95.19,Allocated,Overlock,90.51,100.0,2.52,343
-136,B,84,Trained,93.47,Available,"Buttonhole, SNLS",77.11,82.34,0.5,210
-137,B,131,Untrained,96.44,Available,"Buttonhole, Flatlock, SNLS",71.66,79.4,4.17,92
-138,B,5,Trained,88.37,Allocated,"Flatlock, Buttonhole, SNLS",69.84,81.57,1.19,331
-139,C,24,Trained,92.39,Available,"Flatlock, Buttonhole, Bartack",71.24,73.96,4.09,314
-140,B,14,Trained,100.0,Available,"Kansai, Bartack",76.51,84.99,2.02,141
-141,A,151,Untrained,96.66,Available,"SNLS, Kansai, Bartack",72.01,86.46,5.01,251
-142,A+,98,Untrained,97.1,Allocated,"Buttonhole, Bartack",79.37,92.61,2.3,149
-143,B,9,Trained,99.17,Available,"Buttonhole, SNLS",70.75,81.5,1.87,152
-144,B,101,Trained,86.18,Available,"Buttonhole, Flatlock",74.09,74.24,3.55,172
-145,A+,140,Trained,93.96,Available,"Kansai, Flatlock",89.32,99.9,1.68,226
-146,A+,75,Trained,87.33,Available,"Buttonhole, Overlock, SNLS",84.78,88.74,2.94,391
-147,B,116,Trained,89.54,Available,Flatlock,75.94,88.55,1.21,105
-148,B,122,Trained,91.23,Available,"Flatlock, SNLS, Kansai",71.19,80.25,6.69,116
-149,A,31,Untrained,90.01,Available,"Kansai, Flatlock",85.49,89.9,1.85,177
-150,Jumper,138,Untrained,96.67,Available,"Buttonhole, SNLS, Bartack",85.42,100.0,4.39,99
+1,C,25,Trained,82.31,Available,"Flatlock, SNLS",70.45,70.0,2.96,350
+2,C,91,Trained,91.87,Available,Buttonhole,59.23,75.02,1.44,379
+3,B,6,Trained,93.59,Available,"Bartack, Kansai, Overlock",80.19,86.11,2.67,103
+4,B,109,Untrained,100.0,Available,"SNLS, Bartack, Flatlock",65.46,77.2,4.85,266
+5,A+,105,Trained,84.78,Available,"Buttonhole, Kansai",89.9,97.07,3.64,198
+6,A,160,Trained,91.9,Available,"Flatlock, Overlock, SNLS",82.48,87.7,4.42,238
+7,A+,170,Trained,92.59,Available,"Flatlock, SNLS",87.26,84.96,4.9,190
+8,C,139,Trained,96.76,Available,"Flatlock, Bartack",55.07,70.08,3.15,359
+9,A,126,Trained,93.39,Available,Overlock,87.72,86.26,3.42,188
+10,B,88,Trained,84.14,Available,"Overlock, Flatlock, Bartack",73.0,80.56,2.4,391
+11,C,164,Trained,96.99,Allocated,"Bartack, Kansai, Overlock",66.03,73.62,2.36,79
+12,A,146,Trained,97.41,Available,Flatlock,76.34,93.91,3.96,386
+13,Jumper,3,Trained,86.49,Available,Bartack,90.68,98.08,4.65,62
+14,Jumper,57,Trained,93.84,Allocated,"SNLS, Kansai",96.44,93.92,0.5,266
+15,Jumper,26,Trained,92.46,Available,"Buttonhole, Kansai, SNLS",87.99,92.47,4.16,158
+16,A,106,Trained,91.37,Available,Overlock,77.07,86.97,3.04,316
+17,B,140,Trained,91.65,Allocated,"Bartack, Kansai, Buttonhole",85.31,81.86,3.1,385
+18,C,73,Untrained,100.0,Available,"SNLS, Bartack, Buttonhole",63.77,70.0,4.13,341
+19,B,3,Trained,92.9,Allocated,"Buttonhole, Bartack",61.6,78.61,3.91,103
+20,A+,32,Trained,95.22,Available,Buttonhole,92.72,98.36,2.39,190
+21,C,128,Trained,92.49,Available,Flatlock,56.03,70.0,1.93,97
+22,C,79,Trained,85.32,Allocated,"Buttonhole, Flatlock",68.29,70.0,3.33,363
+23,Jumper,58,Trained,99.58,Available,Kansai,89.14,99.87,1.76,251
+24,A,57,Trained,95.61,Available,Flatlock,77.62,89.98,1.9,230
+25,A+,81,Untrained,95.31,Available,Overlock,83.1,95.53,3.77,76
+26,A,154,Untrained,90.5,Leave,SNLS,74.2,87.03,5.91,189
+27,B,171,Trained,90.35,Available,Overlock,78.57,81.36,0.64,299
+28,A,46,Untrained,91.93,Allocated,"Kansai, Flatlock, Buttonhole",76.87,78.81,3.34,390
+29,Jumper,122,Trained,93.3,Available,"Flatlock, Buttonhole",86.63,91.27,5.12,174
+30,Jumper,86,Trained,93.84,Available,"Bartack, Buttonhole",95.47,100.0,1.21,171
+31,A,15,Trained,92.75,Available,SNLS,74.08,80.84,2.7,269
+32,A,83,Trained,95.26,Available,"SNLS, Flatlock",77.89,89.62,3.6,228
+33,A,79,Trained,95.32,Available,"Bartack, Flatlock, Kansai",86.38,87.23,3.36,172
+34,A+,147,Untrained,96.38,Available,"Buttonhole, Flatlock, Kansai",73.03,93.85,0.5,227
+35,B,163,Trained,96.79,Available,Flatlock,71.7,88.91,4.52,305
+36,Jumper,122,Trained,100.0,Allocated,"Flatlock, Overlock, Buttonhole",81.0,100.0,0.5,156
+37,A,83,Trained,92.58,Available,"Buttonhole, Bartack, SNLS",89.01,78.08,2.01,368
+38,B,36,Trained,100.0,Leave,"Buttonhole, Flatlock",61.87,79.24,2.81,196
+39,C,99,Trained,100.0,Available,"Buttonhole, Overlock, Flatlock",61.51,70.0,5.11,284
+40,C,19,Untrained,96.67,Available,"Flatlock, Bartack",48.32,70.0,3.17,334
+41,Jumper,29,Untrained,92.04,Allocated,"Buttonhole, Bartack",87.97,100.0,3.82,213
+42,A+,179,Trained,100.0,Available,Flatlock,92.09,90.89,2.77,66
+43,A,122,Trained,100.0,Available,Bartack,84.47,89.44,4.68,97
+44,B,13,Trained,87.93,Available,"Kansai, Flatlock, Buttonhole",60.23,79.18,2.26,106
+45,A,103,Trained,84.89,Available,Bartack,80.72,84.75,2.92,394
+46,A+,102,Trained,93.98,Available,"SNLS, Flatlock, Overlock",79.69,100.0,4.42,235
+47,Jumper,97,Untrained,83.66,Available,"SNLS, Kansai, Buttonhole",91.48,100.0,3.01,291
+48,A+,28,Trained,86.21,Available,"Overlock, Flatlock",81.24,92.79,1.01,181
+49,Jumper,120,Trained,87.84,Allocated,"SNLS, Flatlock, Overlock",94.22,99.21,1.91,100
+50,A,113,Trained,88.75,Available,"Bartack, Buttonhole",78.38,89.08,2.64,227
+51,B,143,Untrained,93.61,Allocated,Overlock,82.65,75.91,3.33,246
+52,C,138,Trained,87.23,Available,Bartack,58.85,70.0,2.82,140
+53,A+,142,Trained,93.48,Allocated,"Kansai, Buttonhole, Overlock",86.24,100.0,3.82,76
+54,Jumper,50,Trained,100.0,Available,"Bartack, Kansai, Overlock",93.08,100.0,2.53,175
+55,A,78,Trained,95.42,Available,"Buttonhole, SNLS",78.45,84.8,1.59,60
+56,A,128,Trained,87.8,Allocated,"SNLS, Kansai",76.0,96.75,1.75,365
+57,A+,97,Trained,82.77,Allocated,Kansai,96.59,90.93,2.01,255
+58,B,69,Trained,86.68,Allocated,"Kansai, Buttonhole, SNLS",79.38,80.16,3.16,361
+59,B,115,Trained,95.64,Available,"Bartack, Kansai",74.08,77.91,4.67,268
+60,A,105,Trained,100.0,Available,"Flatlock, Buttonhole",83.4,85.58,2.34,163
+61,A,155,Trained,97.05,Available,Kansai,80.02,97.6,2.98,396
+62,A,80,Trained,95.91,Available,"Flatlock, Overlock, SNLS",78.82,86.12,3.51,375
+63,B,16,Trained,97.59,Available,"Buttonhole, Flatlock",75.19,76.49,3.02,348
+64,Jumper,169,Untrained,87.97,Available,Kansai,93.79,97.66,1.22,117
+65,B,46,Untrained,98.62,Leave,"Overlock, Flatlock, Bartack",65.93,80.83,3.39,265
+66,B,115,Trained,96.09,Allocated,Overlock,71.78,80.81,5.47,311
+67,B,140,Trained,86.14,Allocated,"Buttonhole, SNLS, Overlock",68.98,82.48,3.43,188
+68,B,179,Trained,88.93,Allocated,"SNLS, Bartack",68.36,81.37,1.41,114
+69,Jumper,63,Trained,94.14,Available,Overlock,96.9,100.0,2.13,373
+70,B,79,Trained,90.91,Available,"Bartack, Kansai",78.04,79.89,3.32,144
+71,Jumper,46,Untrained,82.7,Available,"Bartack, Buttonhole, Overlock",88.92,100.0,4.75,192
+72,B,87,Trained,98.41,Available,Flatlock,71.5,78.39,3.49,264
+73,A,6,Trained,97.96,Available,"Overlock, Flatlock, Bartack",82.91,92.59,1.41,90
+74,A,91,Untrained,98.29,Available,"Buttonhole, SNLS, Overlock",80.47,92.46,1.44,74
+75,B,175,Trained,100.0,Available,"SNLS, Bartack",75.4,79.1,4.48,222
+76,Jumper,82,Untrained,100.0,Available,Bartack,85.63,100.0,3.87,365
+77,C,71,Untrained,95.15,Allocated,"SNLS, Kansai",64.73,70.0,3.3,232
+78,A,37,Untrained,92.67,Available,"Overlock, Flatlock, SNLS",68.95,91.46,1.82,277
+79,B,59,Trained,97.27,Available,"SNLS, Bartack",78.15,74.28,0.95,58
+80,A,22,Trained,93.6,Available,Flatlock,87.08,87.9,4.29,112
+81,A,10,Trained,96.51,Available,SNLS,72.81,91.56,1.62,56
+82,B,10,Trained,91.58,Available,"SNLS, Kansai, Buttonhole",70.31,76.34,3.1,67
+83,B,80,Trained,90.22,Available,Bartack,72.12,72.87,3.54,200
+84,B,47,Trained,100.0,Allocated,"SNLS, Flatlock",72.1,82.16,4.21,155
+85,C,57,Trained,100.0,Available,"SNLS, Bartack, Flatlock",68.23,70.0,2.92,281
+86,C,3,Trained,87.89,Available,Bartack,64.21,70.0,1.68,234
+87,B,67,Trained,99.47,Available,"Overlock, SNLS",69.98,76.47,2.51,197
+88,A,42,Untrained,97.02,Available,"Bartack, SNLS, Buttonhole",85.54,86.69,5.35,226
+89,A+,13,Trained,84.35,Allocated,SNLS,91.39,87.95,3.21,132
+90,B,134,Untrained,89.31,Leave,"Buttonhole, SNLS",71.63,88.37,3.91,191
+91,A,109,Untrained,91.59,Available,"Buttonhole, Kansai, Bartack",80.53,89.84,3.33,115
+92,B,7,Trained,87.88,Available,"Buttonhole, Flatlock",79.19,84.75,0.84,311
+93,B,38,Trained,93.13,Available,"Overlock, SNLS, Bartack",72.71,73.16,3.67,176
+94,A,75,Trained,92.55,Available,"SNLS, Flatlock, Bartack",87.78,86.93,3.75,89
+95,C,144,Trained,90.54,Allocated,"Flatlock, Bartack, Kansai",58.01,71.46,3.54,371
+96,C,22,Trained,93.74,Allocated,"Kansai, Overlock",60.83,70.0,3.06,304
+97,A+,60,Trained,86.99,Available,"Flatlock, SNLS",81.15,99.02,2.47,143
+98,A+,94,Untrained,89.13,Available,"Buttonhole, Overlock, Bartack",90.52,90.12,1.68,134
+99,C,38,Trained,93.82,Available,"Flatlock, Overlock",60.99,70.0,0.97,223
+100,Jumper,147,Trained,89.99,Available,"Overlock, SNLS",93.57,96.82,3.1,354
+101,A+,127,Untrained,90.63,Available,Overlock,80.14,94.7,3.35,301
+102,C,59,Trained,90.05,Available,"Flatlock, Kansai",64.24,70.0,2.01,169
+103,C,29,Trained,86.5,Available,"Kansai, Buttonhole, Overlock",59.91,74.95,4.92,69
+104,B,135,Trained,87.46,Available,"Flatlock, Bartack",66.74,83.57,3.4,113
+105,C,62,Trained,95.69,Leave,Flatlock,52.82,70.0,2.33,157
+106,A+,86,Trained,90.34,Available,"Buttonhole, Overlock, SNLS",81.75,98.63,1.83,318
+107,Jumper,78,Trained,92.7,Available,"Bartack, Flatlock",86.27,99.43,1.08,266
+108,A+,177,Trained,98.33,Available,"SNLS, Bartack",75.9,93.14,0.5,105
+109,B,179,Trained,90.19,Available,"Flatlock, Kansai",71.86,77.28,4.26,176
+110,A,55,Trained,88.11,Allocated,Flatlock,81.12,94.96,3.08,171
+111,A,175,Trained,95.51,Available,"Flatlock, SNLS, Overlock",74.38,86.24,5.21,316
+112,A+,37,Trained,96.06,Available,"Buttonhole, Kansai, Overlock",85.03,92.72,4.94,92
+113,A,123,Trained,87.15,Available,"Buttonhole, Flatlock, Kansai",84.97,86.79,3.82,248
+114,A+,64,Trained,99.28,Available,"Flatlock, Buttonhole",89.61,93.57,4.71,261
+115,Jumper,66,Trained,100.0,Available,"Kansai, Bartack, Overlock",99.97,100.0,2.98,201
+116,A+,48,Trained,89.67,Available,SNLS,79.05,93.52,3.83,231
+117,B,156,Trained,100.0,Allocated,"Buttonhole, SNLS",73.55,73.45,4.79,131
+118,B,107,Trained,98.62,Available,Overlock,70.74,79.43,3.71,68
+119,A+,24,Trained,88.36,Allocated,Flatlock,81.42,88.97,0.66,267
+120,A+,68,Trained,87.87,Available,"Buttonhole, Bartack, Flatlock",88.85,100.0,1.41,90
+121,B,19,Untrained,90.27,Available,Overlock,71.77,85.2,3.64,173
+122,B,73,Trained,93.15,Available,Overlock,73.84,78.05,3.48,145
+123,A+,84,Trained,93.14,Allocated,"Bartack, Kansai",95.19,94.24,1.69,96
+124,B,21,Trained,86.67,Available,"Bartack, SNLS",79.53,81.16,4.44,312
+125,C,172,Trained,86.72,Available,SNLS,63.78,70.0,5.71,232
+126,B,87,Trained,88.98,Allocated,Kansai,69.48,77.82,1.73,256
+127,Jumper,6,Trained,91.45,Available,"Flatlock, SNLS",88.2,99.54,1.17,152
+128,B,140,Trained,92.4,Available,"Bartack, Kansai",66.14,76.4,2.19,52
+129,B,11,Trained,85.19,Available,"Buttonhole, SNLS, Overlock",84.45,81.9,3.15,207
+130,C,145,Trained,100.0,Available,"Overlock, Flatlock, Bartack",63.72,70.77,1.5,352
+131,A,51,Trained,91.69,Available,Overlock,80.26,88.47,1.56,84
+132,A+,70,Trained,100.0,Available,"SNLS, Kansai, Bartack",82.55,97.85,2.02,333
+133,B,38,Untrained,97.87,Available,"Kansai, Flatlock, SNLS",67.81,71.56,3.94,51
+134,B,113,Untrained,91.26,Allocated,"Bartack, Kansai, SNLS",74.51,77.65,3.3,97
+135,Jumper,139,Trained,94.22,Available,Overlock,88.39,95.65,3.64,344
+136,B,73,Trained,96.73,Available,"SNLS, Kansai, Overlock",67.66,79.84,4.46,115
+137,B,66,Trained,85.02,Allocated,"Flatlock, Overlock",75.87,78.53,1.69,136
+138,B,53,Trained,100.0,Available,"Flatlock, Kansai, Buttonhole",67.88,76.85,2.77,295
+139,C,77,Trained,79.84,Available,SNLS,58.15,70.0,3.64,132
+140,A+,104,Trained,94.48,Available,"Kansai, SNLS, Overlock",84.37,87.28,2.43,193
+141,C,98,Trained,95.41,Available,Overlock,61.89,70.5,4.75,290
+142,C,132,Trained,96.34,Available,"Buttonhole, Bartack",62.9,70.0,3.54,364
+143,A,53,Trained,93.72,Available,"Kansai, Buttonhole",72.25,89.32,4.73,104
+144,C,142,Trained,89.18,Available,Bartack,65.62,75.81,1.7,54
+145,A+,28,Trained,94.66,Available,"Flatlock, SNLS, Overlock",90.26,97.36,0.5,99
+146,A,140,Trained,97.69,Available,SNLS,85.78,92.69,3.43,328
+147,B,53,Trained,100.0,Available,"Overlock, Kansai, Bartack",75.41,78.64,4.37,98
+148,C,96,Trained,99.21,Allocated,Overlock,62.57,70.0,3.86,253
+149,Jumper,133,Trained,83.57,Allocated,"Bartack, Overlock",94.2,100.0,3.61,275
+150,A,152,Untrained,95.14,Leave,"Kansai, Bartack, SNLS",82.05,92.6,3.68,265

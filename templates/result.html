@@ -1,77 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Prediction Result</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Order Feasibility | Smart Apparel</title>
     <style>
-        body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
-        .container { max-width:900px; margin:auto; background:#fff; padding:30px;
-                     border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-        h1, h2 { color:#1a3d5c; }
-        .badge { display:inline-block; padding:8px 18px; border-radius:20px;
-                 font-weight:700; color:#fff; font-size:18px; }
-        .ACCEPT { background:#28a745; }
-        .INTERV { background:#f0ad4e; }
-        .RISKY { background:#fd7e14; }
-        .REJECT { background:#dc3545; }
-        table { width:100%; border-collapse:collapse; margin-top:12px; }
-        th, td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
-        th { background:#f4f6f8; }
-        .explain li { margin:6px 0; }
-        .prob { font-size:26px; font-weight:700; color:#1a73e8; }
-        a.btn { display:inline-block; margin-top:20px; padding:10px 18px;
-                background:#1a73e8; color:#fff; border-radius:6px;
-                text-decoration:none; }
+        :root { --ink:#16324f; --muted:#64748b; --line:#e2e8f0; --blue:#1769e0; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; padding:30px 16px; background:#f2f6fa; color:#1e293b; font:14px/1.5 Arial,sans-serif; }
+        .container { width:min(1000px,100%); margin:auto; }
+        .top { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+        h1,h2 { color:var(--ink); }
+        h1 { margin:0; font-size:clamp(25px,4vw,33px); }
+        h2 { margin:0 0 15px; font-size:19px; }
+        .sub { margin:5px 0 0; color:var(--muted); }
+        .card { margin-bottom:18px; padding:23px; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 5px 18px rgba(28,55,80,.05); }
+        .summary { display:grid; grid-template-columns:1fr auto; align-items:center; gap:20px; }
+        .prob { color:var(--blue); font-size:32px; font-weight:800; }
+        .badge { display:inline-block; margin-top:8px; padding:7px 13px; border-radius:999px; color:#fff; font-size:13px; font-weight:700; }
+        .ACCEPT { background:#16834b; } .INTERV { background:#b76b09; } .RISKY { background:#d26918; } .REJECT { background:#bd3340; }
+        .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+        .stat { padding:14px; border-radius:10px; background:#f5f8fb; }
+        .stat span { display:block; color:var(--muted); font-size:12px; }
+        .stat strong { display:block; margin-top:4px; color:var(--ink); font-size:17px; }
+        .recommend { border-left:4px solid #16834b; }
+        .recommend p { margin:0; }
+        table { width:100%; border-collapse:collapse; }
+        th,td { padding:11px 10px; border-bottom:1px solid #edf1f5; text-align:left; white-space:nowrap; }
+        th { color:#53667a; background:#f7f9fb; font-size:12px; }
+        tr:last-child td { border-bottom:0; }
+        .table-wrap { overflow-x:auto; }
+        .explain { margin:0; padding-left:20px; color:#475569; }
+        .explain li { margin:7px 0; }
+        .assumption { padding:13px 15px; border-radius:9px; background:#f5f8fb; color:#53667a; }
+        a.btn { display:inline-block; padding:11px 16px; border-radius:8px; background:var(--blue); color:#fff; text-decoration:none; font-weight:700; }
+        @media(max-width:650px) { .stats { grid-template-columns:repeat(2,1fr); } .summary { grid-template-columns:1fr; } .card { padding:18px; } .top { align-items:flex-start; flex-direction:column; } }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>📊 Order Feasibility Result</h1>
+<main class="container">
+    <div class="top">
+        <div><h1>Order feasibility result</h1><p class="sub">Order of {{ "{:,.0f}".format(order_quantity) }} pieces · handover in {{ handover_days }} days</p></div>
+        <a class="btn" href="/">New estimate</a>
+    </div>
 
-    <p>📈 Probability of On-Time Completion:
-        <span class="prob">{{ p_ontime }}%</span></p>
+    <section class="card summary">
+        <div>
+            <div style="color:#64748b">Predicted probability of on-time completion</div>
+            <div class="prob">{{ p_ontime }}%</div>
+            <span class="badge {% if decision == 'ACCEPT' %}ACCEPT{% elif decision.startswith('ACCEPT WITH') %}INTERV{% elif decision.startswith('RISKY') %}RISKY{% else %}REJECT{% endif %}">{{ decision }}</span>
+        </div>
+        <div style="max-width:330px;color:#64748b">This is a planning estimate based on the sample factory profile and generated demonstration records.</div>
+    </section>
 
-    <p>✅ Final Decision:
-        <span class="badge
-            {% if decision.startswith('ACCEPT') %}ACCEPT
-            {% elif decision.startswith('ACCEPT WITH') %}INTERV
-            {% elif decision.startswith('RISKY') %}RISKY
-            {% else %}REJECT{% endif %}">
-            {{ decision }}
-        </span>
-    </p>
+    <section class="card">
+        <h2>Calculated order and capacity details</h2>
+        <div class="stats">
+            <div class="stat"><span>Handover lead time</span><strong>{{ handover_days }} days</strong></div>
+            <div class="stat"><span>SMV</span><strong>{{ "%.2f"|format(estimated_smv) }} min / piece</strong></div>
+            <div class="stat"><span>Order value</span><strong>LKR {{ "{:,.0f}".format(estimated_order_value) }}</strong></div>
+            <div class="stat"><span>Style</span><strong>{{ style }}</strong></div>
+            <div class="stat"><span>Priority</span><strong>{{ priority }}</strong></div>
+            <div class="stat"><span>Typical workers assumed</span><strong>{{ "%.0f"|format(typical_workers) }}</strong></div>
+            <div class="stat"><span>Efficiency baseline</span><strong>{{ "%.1f"|format(estimated_efficiency) }}%</strong></div>
+            <div class="stat"><span>Daily output target</span><strong>{{ "{:,.0f}".format(order_quantity / handover_days) }} pcs / day</strong></div>
+            <div class="stat"><span>Required workload</span><strong>{{ "{:,.0f}".format(estimated_workload) }} minutes</strong></div>
+            <div class="stat"><span>Capacity coverage</span><strong>{{ "%.2f"|format(capacity_ratio) }}×</strong></div>
+        </div>
+        <p class="assumption" style="margin:16px 0 0">Workload and capacity are calculated from your order details and the factory profile. The current project dataset is generated demo data, so replace it with real factory records before relying on this estimate for a customer commitment.</p>
+    </section>
 
     {% if best %}
-    <h2>🏆 Recommended Minimum-Cost Intervention</h2>
-    <p>🎯 <b>{{ best.scenario }}</b> — Cost: <b>LKR {{ "{:,.0f}".format(best.cost) }}</b>
-       (P(Selected) = {{ best.p_selected }})</p>
+    <section class="card recommend">
+        <h2>Recommended intervention</h2>
+        <p><b>{{ best.scenario }}</b> · estimated cost <b>LKR {{ "{:,.0f}".format(best.cost) }}</b> · {{ scenario_score_label|lower }} {{ (best.p_selected * 100)|round(1) }}%</p>
+    </section>
     {% endif %}
 
-    <h2>📊 Scenario Comparison</h2>
-    <table>
-        <tr>
-            <th>Scenario</th><th>+Workers</th><th>OT (h)</th>
-            <th>+Machines</th><th>Outsourced Qty</th>
-            <th>P(Selected)</th><th>Cost (LKR)</th>
-        </tr>
-        {% for s in scenarios %}
-        <tr>
-            <td>{{ s.scenario }}</td>
-            <td>{{ s.added_workers }}</td>
-            <td>{{ s.overtime_hours }}</td>
-            <td>{{ s.added_machines }}</td>
-            <td>{{ s.outsourced_qty }}</td>
-            <td>{{ s.p_selected }}</td>
-            <td>{{ "{:,.0f}".format(s.cost) }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <section class="card">
+        <h2>Intervention options</h2>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Scenario</th><th>Extra workers</th><th>Overtime</th><th>Extra machines</th><th>Outsourced pieces</th><th>{{ scenario_score_label }}</th><th>Estimated cost (LKR)</th></tr></thead>
+            <tbody>{% for s in scenarios %}<tr>
+                <td>{{ s.scenario }}</td><td>{{ s.added_workers }}</td><td>{{ s.overtime_hours }} h</td><td>{{ s.added_machines }}</td><td>{{ "{:,.0f}".format(s.outsourced_qty) }}</td><td>{{ (s.p_selected * 100)|round(1) }}%</td><td>{{ "{:,.0f}".format(s.cost) }}</td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+    </section>
 
-    <h2>🔍 Explanation</h2>
-    <ul class="explain">
-        {% for e in explanation %}<li>💡 {{ e }}</li>{% endfor %}
-    </ul>
-
-    <a class="btn" href="/">🏠 New Prediction</a>
-</div>
+    <section class="card">
+        <h2>Why this result</h2>
+        <ul class="explain">{% for e in explanation %}<li>{{ e }}</li>{% endfor %}</ul>
+    </section>
+</main>
 </body>
 </html>

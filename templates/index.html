@@ -1,84 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Component 4 - Order Acceptance</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Apparel | Order Planning</title>
     <style>
-        body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
-        .container { max-width:800px; margin:auto; background:#fff; padding:30px;
-                     border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-        h1 { color:#1a3d5c; }
-        label { display:block; margin-top:12px; font-weight:600; color:#333; }
-        input, select { width:100%; padding:8px; border:1px solid #ccc;
-                        border-radius:6px; margin-top:4px; }
-        button { margin-top:20px; background:#1a73e8; color:#fff; border:none;
-                 padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; }
-        button:hover { background:#0d5dc4; }
-        .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        :root { color-scheme: light; --ink:#16324f; --muted:#64748b; --line:#dbe4ed; --blue:#1769e0; --pale:#f3f7fb; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; padding:36px 18px; background:linear-gradient(145deg,#edf4fa,#f8fafc 55%,#e8f1f8); color:#1e293b; font:15px/1.5 Arial,sans-serif; }
+        .shell { width:min(760px,100%); margin:auto; }
+        .card { background:#fff; border:1px solid #e8eef4; border-radius:18px; padding:clamp(24px,5vw,46px); box-shadow:0 18px 50px rgba(20,48,74,.10); }
+        .eyebrow { color:var(--blue); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+        h1 { margin:8px 0 8px; color:var(--ink); font-size:clamp(27px,5vw,36px); line-height:1.15; }
+        .intro { max-width:580px; margin:0 0 30px; color:var(--muted); }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        label { display:block; margin-bottom:7px; color:#334155; font-size:14px; font-weight:700; }
+        input, select { width:100%; min-height:50px; padding:12px 14px; border:1px solid #cbd5e1; border-radius:9px; color:#172b43; background:white; font:inherit; }
+        input:focus, select:focus { outline:3px solid rgba(23,105,224,.15); border-color:var(--blue); }
+        .hint { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
+        .error { margin:0 0 20px; padding:12px 14px; border:1px solid #fecaca; border-radius:9px; background:#fff1f2; color:#9f1239; }
+        .info { display:flex; gap:12px; margin-top:24px; padding:15px 16px; border-radius:10px; background:var(--pale); color:#4b6075; font-size:13px; }
+        .info strong { display:block; margin-bottom:2px; color:var(--ink); }
+        .models { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:0 0 22px; }
+        .model { padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:#fbfdff; color:var(--muted); font-size:13px; }
+        .model strong { display:block; margin:3px 0; color:var(--ink); font-size:16px; }
+        .model small { display:block; margin-top:5px; }
+        button { margin-top:24px; width:100%; min-height:52px; border:0; border-radius:9px; background:var(--blue); color:#fff; font:700 16px Arial,sans-serif; cursor:pointer; box-shadow:0 6px 14px rgba(23,105,224,.18); }
+        button:hover { background:#0f55ba; }
+        .foot { margin-top:18px; color:#718096; font-size:12px; text-align:center; }
+        @media(max-width:560px) { body { padding:18px 12px; } .form-grid,.models { grid-template-columns:1fr; gap:14px; } }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🧵 Smart Apparel - Order Acceptance</h1>
-    <p>📋 Enter order & resource details to predict fulfilment and recommended intervention.</p>
+<main class="shell">
+    <section class="card">
+        <div class="eyebrow">Smart Apparel · Planning assistant</div>
+        <h1>Check an order before you accept it</h1>
+        <p class="intro">Enter the six key order details. The system calculates workload and factory capacity, then compares the available intervention options.</p>
 
-    <form action="/predict" method="POST">
-        <div class="grid">
-            <div>
-                <label>Order Quantity</label>
-                <input type="number" name="order_quantity" value="10000" required>
+        <div class="models" aria-label="Selected models after comparison">
+            <div class="model">N1 · On-time model<strong>{{ best_n1|default('Not trained') }}</strong>
+                {% if n1_metric %}<small>CV ROC-AUC {{ "%.3f"|format(n1_metric.roc_auc) }} · Brier {{ "%.3f"|format(n1_metric.brier_score) }}</small>{% endif %}
             </div>
-            <div>
-                <label>Handover Days</label>
-                <input type="number" name="handover_days" value="10" required>
-            </div>
-            <div>
-                <label>SMV (minutes)</label>
-                <input type="number" step="0.01" name="required_smv_total" value="12.5" required>
-            </div>
-            <div>
-                <label>Order Value (LKR)</label>
-                <input type="number" step="0.01" name="order_value" value="2500000" required>
-            </div>
-            <div>
-                <label>Style</label>
-                <select name="style">
-                    <option>Polo</option><option>T-Shirt</option>
-                    <option>Hoodie</option><option>Legging</option><option>Jacket</option>
-                </select>
-            </div>
-            <div>
-                <label>Priority</label>
-                <select name="priority">
-                    <option>Low</option><option selected>Normal</option><option>High</option>
-                </select>
-            </div>
-            <div>
-                <label>Existing Allocation Conflicts</label>
-                <input type="number" name="n_conflicts" value="2">
-            </div>
-            <div>
-                <label>Avg Worker Efficiency (%)</label>
-                <input type="number" step="0.1" name="avg_worker_eff" value="72">
-            </div>
-            <div>
-                <label>Distinct Workers Available</label>
-                <input type="number" name="distinct_workers" value="18">
-            </div>
-            <div>
-                <label>Distinct Machines</label>
-                <input type="number" name="distinct_machines" value="12">
-            </div>
-            <div>
-                <label>Active Allocations</label>
-                <input type="number" name="active_allocs" value="4">
-            </div>
-            <div>
-                <label>Availability Rate (0-1)</label>
-                <input type="number" step="0.01" name="availability_rate" value="0.75">
+            <div class="model">N2 · Intervention model<strong>{{ best_n2|default('Not trained') }}</strong>
+                {% if n2_metric %}<small>CV ROC-AUC {{ "%.3f"|format(n2_metric.roc_auc) }} · Brier {{ "%.3f"|format(n2_metric.brier_score) }}</small>{% endif %}
             </div>
         </div>
-        <button type="submit">Predict Order Feasibility</button>
-    </form>
-</div>
+
+        {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+
+        <form action="/predict" method="POST">
+            <div class="form-grid">
+                <div>
+                    <label for="order_quantity">Order quantity</label>
+                    <input id="order_quantity" type="number" name="order_quantity" min="1" step="1" value="{{ quantity|default('10000') }}" placeholder="e.g. 10000" required>
+                    <span class="hint">Number of garments in this order</span>
+                </div>
+                <div>
+                    <label for="handover_days">Handover days</label>
+                    <input id="handover_days" type="number" name="handover_days" min="1" step="1" value="{{ handover_days|default('10') }}" placeholder="e.g. 10" required>
+                    <span class="hint">Days available to complete the order</span>
+                </div>
+                <div>
+                    <label for="required_smv_total">SMV (minutes per piece)</label>
+                    <input id="required_smv_total" type="number" name="required_smv_total" min="0.01" step="0.01" value="{{ smv|default('12.5') }}" required>
+                    <span class="hint">Standard minute value for one garment</span>
+                </div>
+                <div>
+                    <label for="order_value">Order value (LKR)</label>
+                    <input id="order_value" type="number" name="order_value" min="0.01" step="0.01" value="{{ order_value|default('2500000') }}" required>
+                    <span class="hint">Total value of the order</span>
+                </div>
+                <div>
+                    <label for="style">Style</label>
+                    <select id="style" name="style">
+                        {% for option in ['Polo', 'T-Shirt', 'Hoodie', 'Legging', 'Jacket'] %}
+                        <option value="{{ option }}" {% if style|default('Polo') == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        {% for option in ['Low', 'Normal', 'High'] %}
+                        <option value="{{ option }}" {% if priority|default('Normal') == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="info">
+                <span aria-hidden="true">ℹ️</span>
+                <div><strong>What the system calculates</strong>Required workload, daily production target, capacity ratio, on-time probability and recommended interventions.</div>
+            </div>
+            <button type="submit">Calculate order feasibility <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="foot">This project currently uses generated demo records. Replace them with real factory data before using estimates for order commitments.</div>
+    </section>
+</main>
 </body>
 </html>

@@ -9,12 +9,16 @@
 import numpy as np
 import pandas as pd
 import os
+import sys
 from datetime import datetime, timedelta
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 np.random.seed(42)
 os.makedirs("data", exist_ok=True)
 
-N_ORDERS   = 800          # slightly more data → better ML
+N_ORDERS   = 3000         # larger reproducible sample for training demonstrations
 N_WORKERS  = 150
 N_MACHINES = 60
 
@@ -24,17 +28,28 @@ N_MACHINES = 60
 styles     = ["Polo", "T-Shirt", "Hoodie", "Legging", "Jacket"]
 customers  = [f"C{i:03d}" for i in range(1, 21)]
 priorities = ["Low", "Normal", "High"]
+style_smv_ranges = {
+    "Polo": (10, 16), "T-Shirt": (7, 13), "Hoodie": (18, 32),
+    "Legging": (10, 18), "Jacket": (22, 40),
+}
+style_price_ranges_lkr = {
+    "Polo": (200, 320), "T-Shirt": (150, 260), "Hoodie": (400, 800),
+    "Legging": (180, 350), "Jacket": (500, 1000),
+}
+style_capacity_factor = {"Polo": 1.00, "T-Shirt": 1.02, "Hoodie": 0.94,
+                         "Legging": 0.98, "Jacket": 0.92}
+priority_capacity_factor = {"Low": 1.04, "Normal": 1.00, "High": 0.90}
 
 orders = []
 for i in range(1, N_ORDERS + 1):
     qty        = int(np.random.choice([2000, 3000, 5000, 8000, 10000, 15000],
                                        p=[0.15, 0.20, 0.25, 0.20, 0.15, 0.05]))
-    smv_total  = round(np.random.uniform(8, 45), 2)
+    style      = np.random.choice(styles)
+    smv_total  = round(np.random.uniform(*style_smv_ranges[style]), 2)
     handover_d = int(np.random.choice([7, 10, 14, 20, 30],
                                        p=[0.15, 0.30, 0.30, 0.15, 0.10]))
-    order_val  = round(qty * np.random.uniform(1.2, 3.5), 2)
+    order_val  = round(qty * np.random.uniform(*style_price_ranges_lkr[style]), 2)
     priority   = np.random.choice(priorities, p=[0.2, 0.6, 0.2])
-    style      = np.random.choice(styles)
 
     # ---- Total required workload (worker-minutes) ----
     required_workload = qty * smv_total
@@ -52,7 +67,11 @@ for i in range(1, N_ORDERS + 1):
     total_capacity = daily_capacity * handover_d
 
     # ---- Feasibility ratio ----
-    feasibility_ratio = total_capacity / max(required_workload, 1)   # >1 means surplus
+    feasibility_ratio = (
+        total_capacity / max(required_workload, 1)
+        * style_capacity_factor[style]
+        * priority_capacity_factor[priority]
+    )   # >1 means surplus after style and priority adjustments
 
     # ---- Probability of on-time via sigmoid centered at 1.0 ----
     #      ratio 1.0 -> 50%, ratio 1.5 -> ~88%, ratio 0.5 -> ~12%
@@ -290,7 +309,8 @@ for _, o in df_orders.iterrows():
         ot_cost   = ot_h * 5000
         hire_cost = added_w * 3000
         mach_cost = add_m * 2500
-        out_cost  = outs_q * np.random.uniform(0.5, 1.2)
+        unit_value = o["order_value"] / o["order_quantity"]
+        out_cost  = outs_q * unit_value * np.random.uniform(0.45, 0.75)
         total_c   = labour_c + ot_cost + hire_cost + mach_cost + out_cost
 
         scenarios.append({
