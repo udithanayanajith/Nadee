@@ -21,14 +21,10 @@
         .error { margin:0 0 20px; padding:12px 14px; border:1px solid #fecaca; border-radius:9px; background:#fff1f2; color:#9f1239; }
         .info { display:flex; gap:12px; margin-top:24px; padding:15px 16px; border-radius:10px; background:var(--pale); color:#4b6075; font-size:13px; }
         .info strong { display:block; margin-bottom:2px; color:var(--ink); }
-        .models { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:0 0 22px; }
-        .model { padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:#fbfdff; color:var(--muted); font-size:13px; }
-        .model strong { display:block; margin:3px 0; color:var(--ink); font-size:16px; }
-        .model small { display:block; margin-top:5px; }
         button { margin-top:24px; width:100%; min-height:52px; border:0; border-radius:9px; background:var(--blue); color:#fff; font:700 16px Arial,sans-serif; cursor:pointer; box-shadow:0 6px 14px rgba(23,105,224,.18); }
         button:hover { background:#0f55ba; }
         .foot { margin-top:18px; color:#718096; font-size:12px; text-align:center; }
-        @media(max-width:560px) { body { padding:18px 12px; } .form-grid,.models { grid-template-columns:1fr; gap:14px; } }
+        @media(max-width:560px) { body { padding:18px 12px; } .form-grid { grid-template-columns:1fr; gap:14px; } }
     </style>
 </head>
 <body>
@@ -36,16 +32,7 @@
     <section class="card">
         <div class="eyebrow">Smart Apparel · Planning assistant</div>
         <h1>Check an order before you accept it</h1>
-        <p class="intro">Enter the six key order details. The system calculates workload and factory capacity, then compares the available intervention options.</p>
-
-        <div class="models" aria-label="Selected models after comparison">
-            <div class="model">N1 · On-time model<strong>{{ best_n1|default('Not trained') }}</strong>
-                {% if n1_metric %}<small>CV ROC-AUC {{ "%.3f"|format(n1_metric.roc_auc) }} · Brier {{ "%.3f"|format(n1_metric.brier_score) }}</small>{% endif %}
-            </div>
-            <div class="model">N2 · Intervention model<strong>{{ best_n2|default('Not trained') }}</strong>
-                {% if n2_metric %}<small>CV ROC-AUC {{ "%.3f"|format(n2_metric.roc_auc) }} · Brier {{ "%.3f"|format(n2_metric.brier_score) }}</small>{% endif %}
-            </div>
-        </div>
+        <p class="intro">Enter the order details and the lines and shifts you can make available. Get a delivery outlook, recommended production capacity, grade-based staffing requirements and intervention cost estimates.</p>
 
         {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
 
@@ -60,6 +47,20 @@
                     <label for="handover_days">Handover days</label>
                     <input id="handover_days" type="number" name="handover_days" min="1" step="1" value="{{ handover_days|default('10') }}" placeholder="e.g. 10" required>
                     <span class="hint">Days available to complete the order</span>
+                </div>
+                <div>
+                    <label for="available_lines">Available sewing lines</label>
+                    <input id="available_lines" type="number" name="available_lines" min="1" max="30" step="1" value="{{ available_lines|default('4') }}" required>
+                    <span class="hint">How many lines can be assigned (1–30)</span>
+                </div>
+                <div>
+                    <label for="available_shifts">Available shifts per line / day</label>
+                    <select id="available_shifts" name="available_shifts" required>
+                        {% for option in [1, 2, 3] %}
+                        <option value="{{ option }}" {% if available_shifts|default('1')|int == option %}selected{% endif %}>{{ option }} shift{% if option > 1 %}s{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="hint">Each selected line-shift is assumed to be staffed</span>
                 </div>
                 <div>
                     <label for="required_smv_total">SMV (minutes per piece)</label>
@@ -91,11 +92,11 @@
 
             <div class="info">
                 <span aria-hidden="true">ℹ️</span>
-                <div><strong>What the system calculates</strong>Required workload, daily production target, capacity ratio, on-time probability and recommended interventions.</div>
+                <div><strong>What the system calculates</strong>N1 order feasibility; N2 intervention and cost comparisons; recommended lines and shifts; grade-based required headcount and production targets by line/shift.</div>
             </div>
             <button type="submit">Calculate order feasibility <span aria-hidden="true">→</span></button>
         </form>
-        <div class="foot">This project currently uses generated demo records. Replace them with real factory data before using estimates for order commitments.</div>
+        <div class="foot">Confirm current line staffing and machine availability before committing an order.</div>
     </section>
 </main>
 </body>

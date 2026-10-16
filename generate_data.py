@@ -1,10 +1,9 @@
 """
- Generate realistic synthetic datasets for Component 4:
+ Generate sample datasets for Component 4:
   - N1: Resource-conditioned probabilistic order fulfilment
   - N2: Uncertainty-aware minimum-cost intervention
 
- NOTE: These are SYNTHETIC. Use only for pipeline testing / demos.
- Real factory data should replace these CSVs later.
+ Replace these CSVs with current factory records for operational use.
 """
 import numpy as np
 import pandas as pd

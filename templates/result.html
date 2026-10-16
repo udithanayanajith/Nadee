@@ -40,17 +40,23 @@
 <body>
 <main class="container">
     <div class="top">
-        <div><h1>Order feasibility result</h1><p class="sub">Order of {{ "{:,.0f}".format(order_quantity) }} pieces · handover in {{ handover_days }} days</p></div>
+        <div><h1>Order production plan</h1><p class="sub">Order of {{ "{:,.0f}".format(order_quantity) }} pieces · handover in {{ handover_days }} days</p></div>
         <a class="btn" href="/">New estimate</a>
     </div>
 
     <section class="card summary">
         <div>
-            <div style="color:#64748b">Predicted probability of on-time completion</div>
-            <div class="prob">{{ p_ontime }}%</div>
-            <span class="badge {% if decision == 'ACCEPT' %}ACCEPT{% elif decision.startswith('ACCEPT WITH') %}INTERV{% elif decision.startswith('RISKY') %}RISKY{% else %}REJECT{% endif %}">{{ decision }}</span>
+            <div style="color:#64748b">Production feasibility assessment</div>
+            {% if n1_analysis.available %}
+            <div class="prob">{{ "%.2f"|format(n1_analysis.percent) }}%</div>
+            <div style="color:#64748b">Predicted on-time likelihood</div>
+            {% else %}
+            <div style="margin:10px 0;color:#64748b">Delivery estimate unavailable</div>
+            {% endif %}
+            <span class="badge {% if decision.startswith('CAPACITY FIT') %}ACCEPT{% elif decision.startswith('TIGHT') %}INTERV{% else %}REJECT{% endif %}">{{ decision }}</span>
+            <div style="margin-top:5px;color:#64748b;font-size:12px">Line-capacity decision</div>
         </div>
-        <div style="max-width:330px;color:#64748b">This is a planning estimate based on the sample factory profile and generated demonstration records.</div>
+        <div style="max-width:440px;color:#64748b">{{ production_plan.capacity_source }} for this order. Confirm the required staffing and machine readiness before releasing the plan.</div>
     </section>
 
     <section class="card">
@@ -61,28 +67,151 @@
             <div class="stat"><span>Order value</span><strong>LKR {{ "{:,.0f}".format(estimated_order_value) }}</strong></div>
             <div class="stat"><span>Style</span><strong>{{ style }}</strong></div>
             <div class="stat"><span>Priority</span><strong>{{ priority }}</strong></div>
-            <div class="stat"><span>Typical workers assumed</span><strong>{{ "%.0f"|format(typical_workers) }}</strong></div>
-            <div class="stat"><span>Efficiency baseline</span><strong>{{ "%.1f"|format(estimated_efficiency) }}%</strong></div>
             <div class="stat"><span>Daily output target</span><strong>{{ "{:,.0f}".format(order_quantity / handover_days) }} pcs / day</strong></div>
             <div class="stat"><span>Required workload</span><strong>{{ "{:,.0f}".format(estimated_workload) }} minutes</strong></div>
             <div class="stat"><span>Capacity coverage</span><strong>{{ "%.2f"|format(capacity_ratio) }}×</strong></div>
         </div>
-        <p class="assumption" style="margin:16px 0 0">Workload and capacity are calculated from your order details and the factory profile. The current project dataset is generated demo data, so replace it with real factory records before relying on this estimate for a customer commitment.</p>
+        <p class="assumption" style="margin:16px 0 0">The production model estimates aggregate output per line-shift for this order. It does not identify workers or confirm current attendance.</p>
+        <p class="assumption">Output planning uses the order style, SMV, available lines, shift length and selected handover period. Order value and priority are shown for planning context; they do not change the capacity estimate.</p>
     </section>
 
-    {% if best %}
-    <section class="card recommend">
-        <h2>Recommended intervention</h2>
-        <p><b>{{ best.scenario }}</b> · estimated cost <b>LKR {{ "{:,.0f}".format(best.cost) }}</b> · {{ scenario_score_label|lower }} {{ (best.p_selected * 100)|round(1) }}%</p>
+    <section class="card" id="n1-feasibility">
+        <h2>Order delivery outlook</h2>
+        {% if n1_analysis.available %}
+        <div class="stats">
+            <div class="stat"><span>Predicted on-time likelihood</span><strong>{{ "%.2f"|format(n1_analysis.percent) }}%</strong></div>
+            <div class="stat"><span>Model</span><strong>{{ n1_analysis.model_name }}</strong></div>
+            {% if n1_analysis.validation_auc is not none %}<div class="stat"><span>Model validation ROC-AUC</span><strong>{{ "%.3f"|format(n1_analysis.validation_auc) }}</strong></div>{% endif %}
+            {% if n1_analysis.validation_brier is not none %}<div class="stat"><span>Model validation Brier score</span><strong>{{ "%.3f"|format(n1_analysis.validation_brier) }}</strong></div>{% endif %}
+            <div class="stat"><span>Model interpretation</span><strong>{{ n1_analysis.decision }}</strong></div>
+        </div>
+        <p class="assumption">{{ n1_analysis.scope_note }} Review this order-level estimate together with the line and shift capacity plan below.</p>
+        {% else %}
+        <p class="assumption">{{ n1_analysis.message }}</p>
+        {% endif %}
     </section>
-    {% endif %}
+
+    <section class="card" id="n2-interventions">
+        <h2>Intervention options and cost outlook</h2>
+        {% if n2_analysis.available %}
+        <div class="stats">
+            <div class="stat"><span>Intervention model</span><strong>{{ n2_analysis.model_name }}</strong></div>
+            {% if n2_analysis.validation_auc is not none %}<div class="stat"><span>Model validation ROC-AUC</span><strong>{{ "%.3f"|format(n2_analysis.validation_auc) }}</strong></div>{% endif %}
+            {% if n2_analysis.validation_brier is not none %}<div class="stat"><span>Model validation Brier score</span><strong>{{ "%.3f"|format(n2_analysis.validation_brier) }}</strong></div>{% endif %}
+            {% if n2_analysis.cost_mae is not none %}<div class="stat"><span>Cost estimate validation error</span><strong>LKR {{ "{:,.0f}".format(n2_analysis.cost_mae) }}</strong></div>{% endif %}
+            <div class="stat"><span>Lowest estimated intervention cost</span><strong>{{ n2_analysis.lowest_cost.label }} · LKR {{ "{:,.0f}".format(n2_analysis.lowest_cost.estimated_cost) }}</strong></div>
+            <div class="stat"><span>Highest model selection score</span><strong>{{ n2_analysis.top_selection.label }} · {{ "%.1f"|format(n2_analysis.top_selection.selection_score * 100) }}%</strong></div>
+        </div>
+        <p class="assumption">{{ n2_analysis.scope_note }} Intervention quantities are planning estimates. Confirm available staff, machines, overtime and supplier rates before approving a scenario.</p>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Intervention option</th><th>Added workers</th><th>Overtime hours</th><th>Added machines</th><th>Outsourced pcs</th><th>Estimated cost</th><th>Cost / order value</th><th>Model selection score</th></tr></thead>
+            <tbody>{% for option in n2_analysis.options %}<tr>
+                <td>{{ option.label }}</td>
+                <td>{{ "%.1f"|format(option.added_workers) }}</td>
+                <td>{{ "%.1f"|format(option.overtime_hours) }}</td>
+                <td>{{ "%.1f"|format(option.added_machines) }}</td>
+                <td>{{ "{:,.0f}".format(option.outsourced_qty) }}</td>
+                <td>LKR {{ "{:,.0f}".format(option.estimated_cost) }}</td>
+                <td>{{ "%.2f"|format(option.cost_share_order_value) }}%</td>
+                <td>{{ "%.1f"|format(option.selection_score * 100) }}%</td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+        {% else %}
+        <p class="assumption">{{ n2_analysis.message }}</p>
+        {% endif %}
+    </section>
 
     <section class="card">
-        <h2>Intervention options</h2>
+        <h2>Recommended line-shift capacity plan</h2>
+        <div class="stats">
+            <div class="stat"><span>Lines available</span><strong>{{ production_plan.available_lines }}</strong></div>
+            <div class="stat"><span>Shifts available per day</span><strong>{{ production_plan.max_shifts }}</strong></div>
+            <div class="stat"><span>Line-shifts recommended</span><strong>{{ production_plan.recommended.line_shifts }}</strong></div>
+            <div class="stat"><span>Expected output / day</span><strong>{{ "{:,.0f}".format(production_plan.recommended.daily_output) }} pcs</strong></div>
+            <div class="stat"><span>Conservative output / day</span><strong>{{ "{:,.0f}".format(production_plan.recommended.daily_output_low) }} pcs</strong></div>
+            <div class="stat"><span>Daily order target</span><strong>{{ "{:,.0f}".format(production_plan.daily_target) }} pcs</strong></div>
+            <div class="stat"><span>Expected completion</span><strong>{{ production_plan.recommended.estimated_days }} days</strong></div>
+            <div class="stat"><span>Conservative completion</span><strong>{{ production_plan.recommended.conservative_days }} days</strong></div>
+            <div class="stat"><span>Estimated output / line-shift / day (lower–upper)</span><strong>{{ "{:,.0f}".format(production_plan.rate_low) }}–{{ "{:,.0f}".format(production_plan.rate_high) }} pcs</strong></div>
+        </div>
+        <p class="assumption">Recommended basis: <b>{{ production_plan.recommended.name }}</b> ({{ production_plan.recommended.basis }}). This is a capacity estimate per fully staffed line-shift. The grade mix below shows required staffing only; match it to the supervisor's current roster and confirm machine readiness before shift release. {{ production_plan.machine_note }}</p>
+        <h3>Line-shift allocation</h3>
         <div class="table-wrap"><table>
-            <thead><tr><th>Scenario</th><th>Extra workers</th><th>Overtime</th><th>Extra machines</th><th>Outsourced pieces</th><th>{{ scenario_score_label }}</th><th>Estimated cost (LKR)</th></tr></thead>
-            <tbody>{% for s in scenarios %}<tr>
-                <td>{{ s.scenario }}</td><td>{{ s.added_workers }}</td><td>{{ s.overtime_hours }} h</td><td>{{ s.added_machines }}</td><td>{{ "{:,.0f}".format(s.outsourced_qty) }}</td><td>{{ (s.p_selected * 100)|round(1) }}%</td><td>{{ "{:,.0f}".format(s.cost) }}</td>
+            <thead><tr><th>Line</th><th>Shift</th><th>Lower estimate</th><th>Expected estimate</th><th>Upper estimate</th></tr></thead>
+            <tbody>{% for group in production_plan.recommended.groups %}<tr>
+                <td>{{ group.line }}</td><td>{{ group.shift }}</td><td>{{ "{:,.0f}".format(production_plan.rate_low) }} pcs/day</td><td>{{ "{:,.0f}".format(production_plan.rate_median) }} pcs/day</td><td>{{ "{:,.0f}".format(production_plan.rate_high) }} pcs/day</td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+    </section>
+
+    <section class="card">
+        <h2>Detailed production and grade-based workforce plan</h2>
+        <div class="stats">
+            <div class="stat"><span>Recommended active lines</span><strong>{{ production_plan.recommended.lines }}</strong></div>
+            <div class="stat"><span>Shifts used per day</span><strong>{{ production_plan.recommended.shifts }}</strong></div>
+            <div class="stat"><span>Active line-shifts</span><strong>{{ production_plan.recommended.line_shifts }}</strong></div>
+            <div class="stat"><span>Required operators per line-shift</span><strong>{{ production_plan.recommended.operators_per_line_shift }}</strong></div>
+            <div class="stat"><span>Total required operators / day</span><strong>{{ production_plan.recommended.required_operators }}</strong></div>
+            <div class="stat"><span>Daily order target</span><strong>{{ "{:,.0f}".format(production_plan.daily_target) }} pcs</strong></div>
+        </div>
+        <p class="assumption">The grade mix below repeats for every active line-shift and is based on the factory poster. It is the <b>required staffing plan</b>, not a count of workers currently available. This plan contains no worker IDs; match it to the actual roster before releasing the shifts.</p>
+
+        <h3>Required grade mix</h3>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Scope</th><th>Jumper</th><th>A+</th><th>A</th><th>B</th><th>C</th><th>Total operators</th></tr></thead>
+            <tbody>
+                <tr><td>Per active line-shift</td><td>5</td><td>4</td><td>4</td><td>3</td><td>1</td><td>17</td></tr>
+                <tr><td>All {{ production_plan.recommended.line_shifts }} active line-shift(s)</td>
+                    <td>{{ production_plan.recommended.grade_totals['Jumper'] }}</td>
+                    <td>{{ production_plan.recommended.grade_totals['A+'] }}</td>
+                    <td>{{ production_plan.recommended.grade_totals['A'] }}</td>
+                    <td>{{ production_plan.recommended.grade_totals['B'] }}</td>
+                    <td>{{ production_plan.recommended.grade_totals['C'] }}</td>
+                    <td>{{ production_plan.recommended.required_operators }}</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <h3>Shift-by-shift production plan</h3>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Shift</th><th>Lines assigned</th><th>Line-shifts</th><th>Required operators</th><th>Production target</th><th>Conservative output</th><th>Expected output</th><th>Upper estimate</th></tr></thead>
+            <tbody>{% for shift in production_plan.recommended.shift_summary %}<tr>
+                <td>{{ shift.shift }}</td>
+                <td>{{ shift.lines|join(', ') }}</td>
+                <td>{{ shift.line_count }}</td>
+                <td>{{ shift.required_operators }}</td>
+                <td>{{ "{:,.0f}".format(shift.target_pieces_per_day) }} pcs/day</td>
+                <td>{{ "{:,.0f}".format(shift.lower_pieces_per_day) }} pcs/day</td>
+                <td>{{ "{:,.0f}".format(shift.expected_pieces_per_day) }} pcs/day</td>
+                <td>{{ "{:,.0f}".format(shift.upper_pieces_per_day) }} pcs/day</td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+
+        <h3>Line-by-line assignment template</h3>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Line</th><th>Shift</th><th>Daily target</th><th>Expected line output</th><th>Jumper</th><th>A+</th><th>A</th><th>B</th><th>C</th><th>Required total</th></tr></thead>
+            <tbody>{% for group in production_plan.recommended.groups %}<tr>
+                <td>Line {{ group.line }}</td><td>{{ group.shift }}</td>
+                <td>{{ "{:,.0f}".format(group.target_pieces_per_day) }} pcs</td>
+                <td>{{ "{:,.0f}".format(group.expected_pieces_per_day) }} pcs</td>
+                <td>{{ group.grade_requirements['Jumper'] }}</td><td>{{ group.grade_requirements['A+'] }}</td>
+                <td>{{ group.grade_requirements['A'] }}</td><td>{{ group.grade_requirements['B'] }}</td>
+                <td>{{ group.grade_requirements['C'] }}</td><td>{{ group.required_operators }}</td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+
+        <h3>Shift execution and control process</h3>
+        <ol class="explain">{% for step in production_plan.process_steps %}<li>{{ step }}</li>{% endfor %}</ol>
+        <p class="assumption">Quality control reference: {{ production_plan.quality_target_reference }}% from the factory poster; it is a target, not a predicted result. Confirm the current grade-wise roster and machine availability before releasing the plan. {{ production_plan.machine_note }}</p>
+    </section>
+
+    <section class="card">
+        <h2>Capacity plan scenarios</h2>
+        <p class="assumption">These scenarios compare estimated output from different line and shift configurations. Labor cost depends on current wage, overtime and overhead rates; quality performance depends on the actual team and production controls.</p>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Plan</th><th>Planning basis</th><th>Lines planned</th><th>Shifts planned / day</th><th>Line-shifts required / planned</th><th>Extra line-shifts needed</th><th>Conservative output / day</th><th>Expected output / day</th><th>Expected days</th><th>Fits handover at plan basis</th></tr></thead>
+            <tbody>{% for plan in production_plan.plans %}<tr>
+                <td>{{ plan.name }}</td><td>{{ plan.basis }}</td><td>{{ plan.lines }}</td><td>{{ plan.shifts }}</td><td>{{ plan.line_shifts_required }} / {{ plan.line_shifts }}</td><td>{{ plan.line_shift_gap }}</td><td>{{ "{:,.0f}".format(plan.daily_output_low) }} pcs</td><td>{{ "{:,.0f}".format(plan.daily_output) }} pcs</td><td>{{ plan.estimated_days }}</td><td>{% if plan.meets_target %}Yes{% else %}No{% endif %}</td>
             </tr>{% endfor %}</tbody>
         </table></div>
     </section>
