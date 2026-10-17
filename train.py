@@ -24,6 +24,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.metrics import (
     accuracy_score,
     brier_score_loss,
+    confusion_matrix,
     f1_score,
     mean_absolute_error,
     precision_score,
@@ -86,6 +87,9 @@ def classification_metrics(y_true, probabilities):
         "f1": round(float(f1_score(y_true, predictions, zero_division=0)), 4),
         "roc_auc": round(float(roc_auc_score(y_true, probabilities)), 4),
         "brier_score": round(float(brier_score_loss(y_true, probabilities)), 4),
+        "confusion_matrix": confusion_matrix(
+            y_true, predictions, labels=[0, 1]
+        ).tolist(),
     }
 
 
