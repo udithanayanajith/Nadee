@@ -5,7 +5,10 @@ Each row is a node; edges connect the nearest training rows, and a mean
 neighbour message is concatenated with each node's own features.
 """
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:  # TensorFlow is optional; sklearn models remain trainable.
+    tf = None
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import brier_score_loss
 from sklearn.model_selection import train_test_split
@@ -29,6 +32,8 @@ class TensorFlowDNNClassifier(ClassifierMixin, BaseEstimator):
         self.random_state = random_state
 
     def fit(self, X, y):
+        if tf is None:
+            raise ImportError("TensorFlow is not installed; skip the DNN candidate or install TensorFlow.")
         X = np.asarray(X, dtype=np.float32)
         y = np.asarray(y, dtype=np.float32)
         self.classes_ = np.unique(y.astype(int))

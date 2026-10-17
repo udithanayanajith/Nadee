@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 
 from model_features import STYLE_ENCODING
+from factory_config import FACTORY_SHIFTS_PER_DAY, OPERATORS_PER_LINE_SHIFT, STANDARD_SHIFT_HOURS
 
-POSTER_OPERATORS_PER_LINE = 17
-REFERENCE_SHIFT_HOURS = 8.0
+POSTER_OPERATORS_PER_LINE = OPERATORS_PER_LINE_SHIFT
+REFERENCE_SHIFT_HOURS = STANDARD_SHIFT_HOURS
 CAPACITY_MODEL_FEATURES = [
     "order_quantity", "handover_days", "required_smv_total", "style_enc",
-    "assigned_lines", "shifts_per_day", "shift_hours",
+    "shift_hours",
 ]
 
 
@@ -20,13 +21,11 @@ def make_capacity_features(quantity, handover_days, smv, order_value,
         "handover_days": float(handover_days),
         "required_smv_total": float(smv),
         "style_enc": float(STYLE_ENCODING[style]),
-        "assigned_lines": float(lines),
-        "shifts_per_day": float(shifts),
         "shift_hours": float(shift_hours),
     }
 
 
-def build_capacity_training_data(orders):
+def build_capacity_training_data(orders, max_shifts=FACTORY_SHIFTS_PER_DAY):
     """Build an order-level target from recorded output and completion dates."""
     data = orders.copy()
     start = pd.to_datetime(data["order_date"], errors="coerce")
@@ -38,6 +37,7 @@ def build_capacity_training_data(orders):
     ]
     for column in numeric_columns:
         data[column] = pd.to_numeric(data[column], errors="coerce")
+    data = data[data["n_shifts"].le(max_shifts)].copy()
     # Keep the encoded feature on the training frame before dropna checks it.
     data["style_enc"] = data["style_id"].map(STYLE_ENCODING)
     data["elapsed_days"] = elapsed

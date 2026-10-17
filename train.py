@@ -39,6 +39,7 @@ from neural_models import (
     GANNClassifier,
     GraphNeuralNetworkClassifier,
     TensorFlowDNNClassifier,
+    tf,
 )
 from model_features import (
     SCENARIO_ENCODING,
@@ -56,6 +57,7 @@ from workforce_model_features import (
     make_worker_operation_features,
 )
 from capacity_model_features import build_capacity_training_data
+from factory_config import FACTORY_SHIFTS_PER_DAY
 
 SEED = 42
 os.makedirs("models", exist_ok=True)
@@ -176,7 +178,6 @@ n1_candidates = {
     "K-Nearest Neighbors": make_pipeline(
         StandardScaler(), KNeighborsClassifier(n_neighbors=25, weights="distance", n_jobs=-1)
     ),
-    "DNN (TensorFlow/Keras)": TensorFlowDNNClassifier(random_state=SEED),
     "Genetic Algorithm Neural Network (GANN)": make_pipeline(
         StandardScaler(), GANNClassifier(population_size=4, generations=2,
                                          max_iter=100, random_state=SEED)
@@ -184,6 +185,8 @@ n1_candidates = {
     "Graph Neural Network (GNN)": GraphNeuralNetworkClassifier(random_state=SEED),
     "Gaussian Naive Bayes": make_pipeline(StandardScaler(), GaussianNB()),
 }
+if tf is not None:
+    n1_candidates["DNN (TensorFlow/Keras)"] = TensorFlowDNNClassifier(random_state=SEED)
 n1_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 n1_name, n1_model, n1_metrics = compare_classifiers(
     "On-time model", n1_candidates, X1, y1, n1_cv
@@ -204,8 +207,17 @@ order_features = {
     )
     for row in orders.itertuples()
 }
+two_shift_order_ids = set(
+    orders.loc[
+        pd.to_numeric(orders["n_shifts"], errors="coerce").le(FACTORY_SHIFTS_PER_DAY),
+        "order_id",
+    ].astype(int)
+)
+scenario_training = scenarios[
+    scenarios["order_id"].astype(int).isin(two_shift_order_ids)
+].copy()
 n2_feature_rows = []
-for scenario in scenarios.to_dict(orient="records"):
+for scenario in scenario_training.to_dict(orient="records"):
     inferred = order_features[int(scenario["order_id"])]
     n2_feature_rows.append(make_intervention_features(inferred, scenario, profile))
 
@@ -216,8 +228,8 @@ N2_FEATURES = [
     "n_conflicts", "avg_worker_eff",
 ]
 X2 = pd.DataFrame(n2_feature_rows, columns=N2_FEATURES)
-y2 = scenarios["selected_flag"].astype(int).to_numpy()
-groups = scenarios["order_id"].to_numpy()
+y2 = scenario_training["selected_flag"].astype(int).to_numpy()
+groups = scenario_training["order_id"].to_numpy()
 n2_cv = GroupKFold(n_splits=5)
 n2_candidates = {
     "Logistic Regression": make_pipeline(
@@ -245,7 +257,6 @@ n2_candidates = {
     "K-Nearest Neighbors": make_pipeline(
         StandardScaler(), KNeighborsClassifier(n_neighbors=25, weights="distance", n_jobs=-1)
     ),
-    "DNN (TensorFlow/Keras)": TensorFlowDNNClassifier(random_state=SEED),
     "Genetic Algorithm Neural Network (GANN)": make_pipeline(
         StandardScaler(), GANNClassifier(population_size=4, generations=2,
                                          max_iter=100, random_state=SEED)
@@ -253,6 +264,8 @@ n2_candidates = {
     "Graph Neural Network (GNN)": GraphNeuralNetworkClassifier(random_state=SEED),
     "Gaussian Naive Bayes": make_pipeline(StandardScaler(), GaussianNB()),
 }
+if tf is not None:
+    n2_candidates["DNN (TensorFlow/Keras)"] = TensorFlowDNNClassifier(random_state=SEED)
 n2_name, n2_model, n2_metrics = compare_classifiers(
     "Intervention model", n2_candidates, X2, y2, n2_cv, groups
 )
@@ -292,11 +305,11 @@ cost_scores = {}
 cost_models = {}
 for model_name, model in cost_candidates.items():
     print(f"  Training cost model {model_name}...", flush=True)
-    oof_cost = cross_val_predict(model, X2, scenarios["total_cost"].to_numpy(),
+    oof_cost = cross_val_predict(model, X2, scenario_training["total_cost"].to_numpy(),
                                  cv=n2_cv, groups=groups, n_jobs=1)
     cost_scores[model_name] = {
-        "mae": round(float(mean_absolute_error(scenarios["total_cost"], oof_cost)), 2),
-        "r2": round(float(r2_score(scenarios["total_cost"], oof_cost)), 4),
+        "mae": round(float(mean_absolute_error(scenario_training["total_cost"], oof_cost)), 2),
+        "r2": round(float(r2_score(scenario_training["total_cost"], oof_cost)), 4),
     }
     cost_models[model_name] = model
 cost_name = min(cost_scores, key=lambda key: cost_scores[key]["mae"])
@@ -305,13 +318,14 @@ print("\nCost model comparison (sorted by MAE):")
 for model_name, metrics in cost_scores.items():
     marker = "  <-- BEST" if model_name == cost_name else ""
     print(f"  {model_name:<30} MAE={metrics['mae']:.2f}  R²={metrics['r2']:.4f}{marker}")
-cost_model = cost_models[cost_name].fit(X2, scenarios["total_cost"].to_numpy())
+cost_model = cost_models[cost_name].fit(X2, scenario_training["total_cost"].to_numpy())
 joblib.dump(cost_model, "models/best_cost_model.pkl")
 
 # N3: line-aware order completion probability. Historical worker counts are
 # mapped to full line equivalents using the poster's 17-operator line mix.
+line_orders = orders[pd.to_numeric(orders["n_shifts"], errors="coerce").le(FACTORY_SHIFTS_PER_DAY)]
 line_feature_rows = []
-for row in orders.itertuples():
+for row in line_orders.itertuples():
     line_count = historical_line_count(row.n_available_workers)
     line_feature_rows.append(make_line_features(
         row.order_quantity, row.handover_days, row.required_smv_total,
@@ -319,7 +333,7 @@ for row in orders.itertuples():
         row.shift_hours,
     ))
 X3 = pd.DataFrame(line_feature_rows, columns=LINE_MODEL_FEATURES)
-y3 = orders["on_time_flag"].astype(int).to_numpy()
+y3 = line_orders["on_time_flag"].astype(int).to_numpy()
 line_model = make_pipeline(
     StandardScaler(),
     LogisticRegression(C=0.8, max_iter=2000, random_state=SEED),
@@ -334,6 +348,10 @@ joblib.dump({
     "name": "Line-aware Logistic Regression",
     "model": line_model,
     "features": LINE_MODEL_FEATURES,
+    "training_ranges": {
+        feature: [float(X3[feature].min()), float(X3[feature].max())]
+        for feature in LINE_MODEL_FEATURES
+    },
 }, "models/line_feasibility_model.pkl")
 print(
     "\nLine-aware model validation: "
@@ -437,7 +455,7 @@ capacity_best = min(
 )
 capacity_model = capacity_candidates[capacity_best].fit(X5, y5)
 capacity_residuals = y5 - capacity_oof_predictions[capacity_best]
-residual_quantiles = np.quantile(capacity_residuals, [0.25, 0.5, 0.75])
+residual_quantiles = np.quantile(capacity_residuals, [0.10, 0.50, 0.90])
 style_target_bounds = {}
 for style_name in sorted(set(capacity_styles)):
     style_values = y5[capacity_styles == style_name]
@@ -450,10 +468,14 @@ capacity_bundle = {
     "name": capacity_best,
     "model": capacity_model,
     "features": list(X5.columns),
+    "feature_ranges": {
+        feature: [float(X5[feature].min()), float(X5[feature].max())]
+        for feature in X5.columns
+    },
     "residual_quantiles": {
-        "p25": float(residual_quantiles[0]),
+        "p10": float(residual_quantiles[0]),
         "p50": float(residual_quantiles[1]),
-        "p75": float(residual_quantiles[2]),
+        "p90": float(residual_quantiles[2]),
     },
     "style_target_bounds": style_target_bounds,
     "training_rows": int(len(X5)),
@@ -475,7 +497,7 @@ print(
 )
 
 report = {
-    "data_note": "Validate operational predictions against actual factory history.",
+    "data_note": "Checked-in records are generated sample data; replace and validate against actual factory history before operational use.",
     "training_orders": int(len(orders)),
     "N1_user_inputs": ["order_quantity", "handover_days", "required_smv_total", "order_value", "style_id", "priority"],
     "training_signature": "six-order-inputs-v1",
@@ -486,9 +508,11 @@ report = {
     "N2_best": n2_name,
     "N2_selection_metric": "Lowest order-grouped 5-fold cross-validated Brier score; ROC-AUC breaks ties",
     "N2_models": n2_metrics,
+    "N2_training_orders": int(scenario_training["order_id"].nunique()),
     "cost_best": cost_name,
     "cost_models": cost_scores,
     "line_model": "Line-aware Logistic Regression",
+    "factory_shifts_per_day": FACTORY_SHIFTS_PER_DAY,
     "line_model_metrics": line_metrics,
     "workforce_model": f"Worker-operation {workforce_best} Regressor",
     "workforce_model_metrics": performance_metrics,
@@ -502,6 +526,7 @@ report = {
     "capacity_model_training_orders": int(len(np.unique(capacity_groups))),
     "capacity_model_features": list(X5.columns),
     "capacity_model_target": capacity_bundle["target"],
+    "capacity_model_interval": "P10/P50/P90 from order-grouped out-of-fold residuals; planning range, not guarantee",
 }
 with open("models/model_comparison.json", "w", encoding="utf-8") as report_file:
     json.dump(report, report_file, indent=2)

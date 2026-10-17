@@ -32,7 +32,7 @@
     <section class="card">
         <div class="eyebrow">Smart Apparel · Planning assistant</div>
         <h1>Check an order before you accept it</h1>
-        <p class="intro">Enter the order details and the lines and shifts you can make available. Get a delivery outlook, recommended production capacity, grade-based staffing requirements and intervention cost estimates.</p>
+        <p class="intro">Enter the order details and available sewing lines. The planner uses this factory's two shifts automatically and estimates delivery risk, production capacity, staffing requirements and intervention costs.</p>
 
         {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
 
@@ -52,15 +52,6 @@
                     <label for="available_lines">Available sewing lines</label>
                     <input id="available_lines" type="number" name="available_lines" min="1" max="30" step="1" value="{{ available_lines|default('4') }}" required>
                     <span class="hint">How many lines can be assigned (1–30)</span>
-                </div>
-                <div>
-                    <label for="available_shifts">Available shifts per line / day</label>
-                    <select id="available_shifts" name="available_shifts" required>
-                        {% for option in [1, 2, 3] %}
-                        <option value="{{ option }}" {% if available_shifts|default('1')|int == option %}selected{% endif %}>{{ option }} shift{% if option > 1 %}s{% endif %}</option>
-                        {% endfor %}
-                    </select>
-                    <span class="hint">Each selected line-shift is assumed to be staffed</span>
                 </div>
                 <div>
                     <label for="required_smv_total">SMV (minutes per piece)</label>
@@ -92,11 +83,11 @@
 
             <div class="info">
                 <span aria-hidden="true">ℹ️</span>
-                <div><strong>What the system calculates</strong>N1 order feasibility; N2 intervention and cost comparisons; recommended lines and shifts; grade-based required headcount and production targets by line/shift.</div>
+                <div><strong>What the system calculates</strong>On-time likelihood for the entered line count and two shifts; intervention cost comparisons; expected production ranges and a staffing requirement plan.</div>
             </div>
             <button type="submit">Calculate order feasibility <span aria-hidden="true">→</span></button>
         </form>
-        <div class="foot">Confirm current line staffing and machine availability before committing an order.</div>
+        <div class="foot">This project currently uses generated sample records. Replace them with completed factory orders and actual costs before using estimates for commitments.</div>
     </section>
 </main>
 </body>

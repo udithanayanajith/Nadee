@@ -58,7 +58,7 @@ for i in range(1, N_ORDERS + 1):
     n_available_workers = int(np.random.randint(20, 80))          # varies per order
     avg_worker_eff      = np.random.uniform(55, 90)               # varies 55-90%
     shift_hours         = 8
-    n_shifts            = np.random.choice([1, 2, 3], p=[0.5, 0.4, 0.1])
+    n_shifts            = np.random.choice([1, 2], p=[0.6, 0.4])
     efficiency_factor   = avg_worker_eff / 100.0
 
     # Effective daily capacity in worker-minutes
@@ -242,6 +242,8 @@ print(f"✅ allocations.csv       — {len(df_allocs)} rows")
 rows = []
 for m in range(1, N_MACHINES + 1):
     for d in range(30):
+        shift_id = np.random.choice(["A", "B"])
+        shift_start, shift_end = ("06:00", "14:00") if shift_id == "A" else ("14:00", "22:00")
         rows.append({
             "machine_id": m,
             "machine_type": np.random.choice(m_types),
@@ -249,9 +251,9 @@ for m in range(1, N_MACHINES + 1):
             "date": (datetime(2024, 1, 1) + timedelta(days=d)).date(),
             "status": np.random.choice(["Available", "Down"], p=[0.92, 0.08]),
             "downtime_hours": round(np.random.choice([0, 0, 0, 1, 2, 4]), 2),
-            "shift_id": np.random.choice(["A", "B", "C"]),
-            "start_time": np.random.choice(["06:00", "14:00", "22:00"]),
-            "end_time":   np.random.choice(["14:00", "22:00", "06:00"]),
+            "shift_id": shift_id,
+            "start_time": shift_start,
+            "end_time":   shift_end,
             "working_hours": 8,
             "overtime_allowed": np.random.choice([0, 1], p=[0.4, 0.6])
         })

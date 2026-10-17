@@ -3,15 +3,16 @@ import math
 
 import numpy as np
 import pandas as pd
-from capacity_model_features import make_capacity_features
+from capacity_model_features import CAPACITY_MODEL_FEATURES, make_capacity_features
+from factory_config import FACTORY_SHIFTS_PER_DAY, OPERATORS_PER_LINE_SHIFT
 
-POSTER_OPERATORS_PER_LINE = 17
+POSTER_OPERATORS_PER_LINE = OPERATORS_PER_LINE_SHIFT
 POSTER_GRADE_MIX = {"Jumper": 5, "A+": 4, "A": 4, "B": 3, "C": 1}
 REFERENCE_SHIFT_HOURS = 8.0
 MIN_STYLE_HISTORY = 30
 
 
-def _historical_minutes_per_line_shift(orders):
+def _historical_minutes_per_line_shift(orders, max_shifts=FACTORY_SHIFTS_PER_DAY):
     """Normalize realized garment minutes to an 8-hour line-shift day."""
     history = orders.copy()
     start = pd.to_datetime(history["order_date"], errors="coerce")
@@ -23,6 +24,7 @@ def _historical_minutes_per_line_shift(orders):
     ]
     for column in numeric:
         history[column] = pd.to_numeric(history[column], errors="coerce")
+    history = history[history["n_shifts"].le(max_shifts)].copy()
     history["elapsed_days"] = elapsed_days
     history["line_shifts_per_day"] = (
         history["n_available_workers"] / POSTER_OPERATORS_PER_LINE
@@ -48,7 +50,7 @@ def _rate_range(history_rows, smv, shift_hours):
     values = history_rows["minutes_per_line_shift"].to_numpy(dtype=float)
     lower, upper = np.percentile(values, [5, 95])
     robust = values[(values >= lower) & (values <= upper)]
-    minute_range = np.percentile(robust, [25, 50, 75])
+    minute_range = np.percentile(robust, [10, 50, 90])
     hours_scale = shift_hours / REFERENCE_SHIFT_HOURS
     return [float(value * hours_scale / smv) for value in minute_range]
 
@@ -69,47 +71,91 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
                                    shift_hours, order_value=1.0,
                                    priority="Normal", capacity_model=None):
     """Plan aggregate line-shift capacity; never imply a live worker roster."""
-    history = _historical_minutes_per_line_shift(orders)
+    max_shifts = FACTORY_SHIFTS_PER_DAY
+    history = _historical_minutes_per_line_shift(orders, FACTORY_SHIFTS_PER_DAY)
     if history.empty:
         return {"error": "Completed orders do not contain enough capacity fields for an estimate."}
 
     selected_history, benchmark_style = _baseline_for_style(history, style)
-    p25_rate, median_rate, p75_rate = _rate_range(selected_history, smv, shift_hours)
+    low_rate, median_rate, high_rate = _rate_range(selected_history, smv, shift_hours)
     capacity_source = "Capacity benchmark estimate (production model unavailable)"
-    if capacity_model and capacity_model.get("model") is not None:
+    capacity_input_note = "Using the historical benchmark for this style and SMV."
+    model_is_current = bool(
+        capacity_model
+        and capacity_model.get("model") is not None
+        and capacity_model.get("features") == CAPACITY_MODEL_FEATURES
+        and capacity_model.get("feature_ranges")
+        and "p10" in capacity_model.get("residual_quantiles", {})
+    )
+    if model_is_current:
         features = pd.DataFrame([make_capacity_features(
             quantity, handover_days, smv, order_value, style, priority,
             available_lines, max_shifts, shift_hours,
         )], columns=capacity_model["features"])
-        predicted_minutes = float(capacity_model["model"].predict(features)[0])
-        residuals = capacity_model["residual_quantiles"]
-        bounds = capacity_model.get("style_target_bounds", {}).get(style)
-        if bounds:
-            minimum, maximum = bounds["p05"], bounds["p95"]
-        else:
-            minimum, maximum = np.percentile(
-                history["minutes_per_line_shift"].to_numpy(dtype=float), [5, 95]
+        feature_ranges = capacity_model.get("feature_ranges", {})
+        out_of_range = [
+            feature for feature in features.columns
+            if feature in feature_ranges and not (
+                feature_ranges[feature][0] <= float(features.iloc[0][feature]) <= feature_ranges[feature][1]
             )
-        minutes_range = [
-            float(np.clip(predicted_minutes + residuals[key], minimum, maximum))
-            for key in ("p25", "p50", "p75")
         ]
-        p25_rate, median_rate, p75_rate = [
-            value * (shift_hours / REFERENCE_SHIFT_HOURS) / smv
-            for value in minutes_range
-        ]
-        capacity_source = "Production model estimate"
+        if out_of_range:
+            capacity_source = "Historical benchmark estimate (outside model training range)"
+            capacity_input_note = (
+                "The production model was not used because one or more order inputs fall outside its training range. "
+                "The displayed output range comes from completed orders for the selected style (or all styles when there are fewer than 30)."
+            )
+        else:
+            predicted_minutes = float(capacity_model["model"].predict(features)[0])
+            residuals = capacity_model["residual_quantiles"]
+            bounds = capacity_model.get("style_target_bounds", {}).get(style)
+            if bounds:
+                minimum, maximum = bounds["p05"], bounds["p95"]
+            else:
+                minimum, maximum = np.percentile(
+                    history["minutes_per_line_shift"].to_numpy(dtype=float), [5, 95]
+                )
+            minutes_range = [
+                float(np.clip(predicted_minutes + residuals[key], minimum, maximum))
+                for key in ("p10", "p50", "p90")
+            ]
+            low_rate, median_rate, high_rate = [
+                value * (shift_hours / REFERENCE_SHIFT_HOURS) / smv
+                for value in minutes_range
+            ]
+            capacity_source = "Production model estimate"
+            capacity_input_note = "Inputs are within the production model's training range."
+    elif capacity_model and capacity_model.get("model") is not None:
+        capacity_source = "Historical benchmark estimate (model needs retraining)"
+        capacity_input_note = (
+            "The saved production model uses an older feature set, so the planner used the historical benchmark instead. "
+            "Retrain the models to enable the updated capacity predictor."
+        )
     daily_target = int(math.ceil(quantity / max(handover_days, 1)))
     max_line_shifts = int(available_lines * max_shifts)
+    shift_scenarios = [
+        {
+            "name": "One shift operating" if shift_count == 1 else "Both shifts operating",
+            "active_shifts": shift_count,
+            "lines": available_lines,
+            "line_shifts": available_lines * shift_count,
+            "required_operators": available_lines * shift_count * POSTER_OPERATORS_PER_LINE,
+            "lower_output": low_rate * available_lines * shift_count,
+            "expected_output": median_rate * available_lines * shift_count,
+            "upper_output": high_rate * available_lines * shift_count,
+            "target_output": daily_target,
+        }
+        for shift_count in range(1, FACTORY_SHIFTS_PER_DAY + 1)
+    ]
 
     def make_plan(name, rate_basis, conservative=False, use_all=False):
-        rate = p25_rate if conservative else median_rate
+        rate = low_rate if conservative else median_rate
         needed = int(math.ceil(daily_target / max(rate, 0.01)))
         count = max_line_shifts if use_all else min(needed, max_line_shifts)
         count = max(1, count)
-        low = p25_rate * count
+        low = low_rate * count
         expected = median_rate * count
-        high = p75_rate * count
+        high = high_rate * count
         basis_output = rate * count
         groups = _make_groups(count, available_lines)
         line_target = daily_target / count
@@ -118,9 +164,9 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
                 "grade_requirements": dict(POSTER_GRADE_MIX),
                 "required_operators": POSTER_OPERATORS_PER_LINE,
                 "target_pieces_per_day": line_target,
-                "lower_pieces_per_day": p25_rate,
+                "lower_pieces_per_day": low_rate,
                 "expected_pieces_per_day": median_rate,
-                "upper_pieces_per_day": p75_rate,
+                "upper_pieces_per_day": high_rate,
             })
         grade_totals = {
             grade: workers * count
@@ -135,18 +181,54 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
                 "line_count": len(shift_groups),
                 "required_operators": len(shift_groups) * POSTER_OPERATORS_PER_LINE,
                 "target_pieces_per_day": line_target * len(shift_groups),
-                "lower_pieces_per_day": p25_rate * len(shift_groups),
+                "lower_pieces_per_day": low_rate * len(shift_groups),
                 "expected_pieces_per_day": median_rate * len(shift_groups),
-                "upper_pieces_per_day": p75_rate * len(shift_groups),
+                "upper_pieces_per_day": high_rate * len(shift_groups),
             })
+
+        # Turn the aggregate capacity recommendation into a usable daily
+        # production target. Allocate whole pieces evenly across active
+        # line-shifts, then roll those allocations up by shift. This is a
+        # target schedule, not a claim that every line has identical measured
+        # performance (the source data has no line-level output history).
+        daily_schedule = []
+        cumulative_target = 0
+        base_day_target, extra_day_targets = divmod(quantity, max(handover_days, 1))
+        for day_number in range(1, max(handover_days, 1) + 1):
+            day_quantity = base_day_target + (1 if day_number <= extra_day_targets else 0)
+            base_line_target, extra_line_targets = divmod(day_quantity, len(groups))
+            group_targets = {
+                group["line_shift_no"]: base_line_target
+                + (1 if index < extra_line_targets else 0)
+                for index, group in enumerate(groups)
+            }
+            for shift in shift_summary:
+                assigned_groups = [
+                    group for group in groups if group["shift"] == shift["shift"]
+                ]
+                shift_target = sum(
+                    group_targets[group["line_shift_no"]] for group in assigned_groups
+                )
+                cumulative_target += shift_target
+                daily_schedule.append({
+                    "day": day_number,
+                    "shift": shift["shift"],
+                    "lines": [group["line"] for group in assigned_groups],
+                    "line_count": len(assigned_groups),
+                    "required_operators": len(assigned_groups) * POSTER_OPERATORS_PER_LINE,
+                    "target_pieces": shift_target,
+                    "cumulative_target": cumulative_target,
+                })
         return {
             "name": name,
             "basis": rate_basis,
             "line_shifts": count,
-            "line_shifts_required": max_line_shifts if use_all else needed,
-            "line_shift_gap": max(0, (max_line_shifts if use_all else needed) - count),
+            "line_shifts_required": needed,
+            "line_shift_gap": max(0, needed - count),
             "groups": groups,
             "shift_summary": shift_summary,
+            "daily_schedule": daily_schedule,
+            "scheduled_order_quantity": quantity,
             "lines": min(available_lines, count),
             "shifts": int(math.ceil(count / max(available_lines, 1))),
             "daily_output_low": low,
@@ -165,16 +247,16 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
         }
 
     forecast_basis = (
-        "Model expected output"
-        if capacity_source.startswith("Trained") else "Benchmark expected output per line-shift"
+        "Model expected output per line-shift"
+        if capacity_source.startswith("Production model") else "Historical benchmark median per line-shift"
     )
     low_basis = (
-        "Model conservative output range"
-        if capacity_source.startswith("Trained") else "Benchmark conservative output range"
+        "Model lower-range output per line-shift"
+        if capacity_source.startswith("Production model") else "Historical benchmark lower range"
     )
-    lean = make_plan("Expected output", forecast_basis)
-    buffered = make_plan("Conservative output", low_basis, conservative=True)
-    delivery = make_plan("Maximum available line-shifts", "All entered lines and shifts", use_all=True)
+    lean = make_plan("Median-rate plan", forecast_basis)
+    buffered = make_plan("Conservative buffer plan", low_basis, conservative=True)
+    delivery = make_plan("Maximum available capacity", "All entered lines across both shifts", use_all=True)
     if buffered["meets_target"]:
         recommended = buffered
         decision = "CAPACITY FIT · BUFFERED"
@@ -196,6 +278,8 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
         "daily_target": daily_target,
         "available_lines": available_lines,
         "max_shifts": max_shifts,
+        "shift_scenarios": shift_scenarios,
+        "factory_shifts_per_day": FACTORY_SHIFTS_PER_DAY,
         "max_line_shifts": max_line_shifts,
         "shift_hours": shift_hours,
         "history_orders_used": int(len(selected_history)),
@@ -203,9 +287,10 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
         "history_period_end": period_end,
         "benchmark_style": benchmark_style,
         "capacity_source": capacity_source,
-        "rate_low": p25_rate,
+        "capacity_input_note": capacity_input_note,
+        "rate_low": low_rate,
         "rate_median": median_rate,
-        "rate_high": p75_rate,
+        "rate_high": high_rate,
         "decision": decision,
         "recommended": recommended,
         "plans": [lean, buffered, delivery],
@@ -219,9 +304,8 @@ def build_historical_capacity_plan(orders, quantity, handover_days, smv,
             "At shift end, record actual good pieces, rejects, downtime and attendance; feed those actuals into the next capacity re-plan.",
         ],
         "planning_note": (
-            "The production model estimates output per line-shift and adjusts it for the selected shift length and order inputs. "
-            "Each planned line-shift assumes the required 17-operator grade mix from the factory staffing standard. "
-            "This is a staffing requirement, not a live attendance count; confirm the current roster and machine readiness before release."
+            "Output rates are pooled historical estimates per staffed line-shift; the source orders do not record separate line or shift results. "
+            "Do not interpret equal per-line rates as equal observed line performance. The standard 17-operator grade mix is a staffing requirement, not a live attendance count."
         ),
         "machine_note": "Machine availability is not live-connected; verify required machines on the assigned lines and shifts.",
     }

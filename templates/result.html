@@ -43,20 +43,21 @@
         <div><h1>Order production plan</h1><p class="sub">Order of {{ "{:,.0f}".format(order_quantity) }} pieces · handover in {{ handover_days }} days</p></div>
         <a class="btn" href="/">New estimate</a>
     </div>
+    <p class="assumption">These project files currently contain generated sample records. Treat model scores and LKR estimates as demonstrations until trained and checked against this factory's completed orders, staffing and actual intervention costs.</p>
 
     <section class="card summary">
         <div>
-            <div style="color:#64748b">Production feasibility assessment</div>
+            <div style="color:#64748b">On-time likelihood for entered capacity</div>
             {% if n1_analysis.available %}
             <div class="prob">{{ "%.2f"|format(n1_analysis.percent) }}%</div>
-            <div style="color:#64748b">Predicted on-time likelihood</div>
+            <div style="color:#64748b">Estimated likelihood · {{ production_plan.available_lines }} lines · {{ production_plan.factory_shifts_per_day }} shifts</div>
             {% else %}
-            <div style="margin:10px 0;color:#64748b">Delivery estimate unavailable</div>
+            <div style="margin:10px 0;color:#64748b">{{ n1_analysis.message }}</div>
             {% endif %}
             <span class="badge {% if decision.startswith('CAPACITY FIT') %}ACCEPT{% elif decision.startswith('TIGHT') %}INTERV{% else %}REJECT{% endif %}">{{ decision }}</span>
             <div style="margin-top:5px;color:#64748b;font-size:12px">Line-capacity decision</div>
         </div>
-        <div style="max-width:440px;color:#64748b">{{ production_plan.capacity_source }} for this order. Confirm the required staffing and machine readiness before releasing the plan.</div>
+        <div style="max-width:440px;color:#64748b">{{ production_plan.capacity_source }}. The likelihood model uses the entered lines and the factory's two shifts. The recommended capacity decision below is based on the production range.</div>
     </section>
 
     <section class="card">
@@ -76,7 +77,7 @@
     </section>
 
     <section class="card" id="n1-feasibility">
-        <h2>Order delivery outlook</h2>
+        <h2>Delivery likelihood for the selected line capacity</h2>
         {% if n1_analysis.available %}
         <div class="stats">
             <div class="stat"><span>Predicted on-time likelihood</span><strong>{{ "%.2f"|format(n1_analysis.percent) }}%</strong></div>
@@ -85,7 +86,7 @@
             {% if n1_analysis.validation_brier is not none %}<div class="stat"><span>Model validation Brier score</span><strong>{{ "%.3f"|format(n1_analysis.validation_brier) }}</strong></div>{% endif %}
             <div class="stat"><span>Model interpretation</span><strong>{{ n1_analysis.decision }}</strong></div>
         </div>
-        <p class="assumption">{{ n1_analysis.scope_note }} Review this order-level estimate together with the line and shift capacity plan below.</p>
+        <p class="assumption">{{ n1_analysis.scope_note }} A low likelihood does not block the capacity plan; the plan shows the recommended staffing scenario and flags when it misses the handover target.</p>
         {% else %}
         <p class="assumption">{{ n1_analysis.message }}</p>
         {% endif %}
@@ -100,11 +101,12 @@
             {% if n2_analysis.validation_brier is not none %}<div class="stat"><span>Model validation Brier score</span><strong>{{ "%.3f"|format(n2_analysis.validation_brier) }}</strong></div>{% endif %}
             {% if n2_analysis.cost_mae is not none %}<div class="stat"><span>Cost estimate validation error</span><strong>LKR {{ "{:,.0f}".format(n2_analysis.cost_mae) }}</strong></div>{% endif %}
             <div class="stat"><span>Lowest estimated intervention cost</span><strong>{{ n2_analysis.lowest_cost.label }} · LKR {{ "{:,.0f}".format(n2_analysis.lowest_cost.estimated_cost) }}</strong></div>
-            <div class="stat"><span>Highest model selection score</span><strong>{{ n2_analysis.top_selection.label }} · {{ "%.1f"|format(n2_analysis.top_selection.selection_score * 100) }}%</strong></div>
+            <div class="stat"><span>Highest historical choice score</span><strong>{{ n2_analysis.top_selection.label }} · {{ "%.1f"|format(n2_analysis.top_selection.selection_score * 100) }}%</strong></div>
         </div>
-        <p class="assumption">{{ n2_analysis.scope_note }} Intervention quantities are planning estimates. Confirm available staff, machines, overtime and supplier rates before approving a scenario.</p>
+        <p class="assumption">“Current resources” means no extra workers, overtime, machines or outsourced pieces, so added-resource counts and incremental cost are 0. It does not mean the factory has no workers or that the order is feasible. The score is similarity to historical scenario choices, not a chance of success. Intervention sizes and costs are learned from the project data; replace sample records with actual factory costs before relying on them.</p>
+        <p class="assumption">{{ n2_analysis.scope_note }} This score is not a probability that the scenario will improve delivery. Confirm available staff, machines, overtime and supplier rates before approving a scenario.</p>
         <div class="table-wrap"><table>
-            <thead><tr><th>Intervention option</th><th>Added workers</th><th>Overtime hours</th><th>Added machines</th><th>Outsourced pcs</th><th>Estimated cost</th><th>Cost / order value</th><th>Model selection score</th></tr></thead>
+            <thead><tr><th>Intervention option</th><th>Added workers</th><th>Overtime hours</th><th>Added machines</th><th>Outsourced pcs</th><th>Estimated cost</th><th>Cost / order value</th><th>Historical choice score</th></tr></thead>
             <tbody>{% for option in n2_analysis.options %}<tr>
                 <td>{{ option.label }}</td>
                 <td>{{ "%.1f"|format(option.added_workers) }}</td>
@@ -123,23 +125,40 @@
 
     <section class="card">
         <h2>Recommended line-shift capacity plan</h2>
+        {% if decision == 'RE-PLAN CAPACITY' %}
+        <p class="assumption" style="border-left:4px solid #bd3340;color:#8f2630;background:#fff4f4"><strong>No feasible shift plan meets this handover target with the entered capacity.</strong> The rows below show the maximum available line-shifts as a recovery scenario. Add staffed lines or shifts, extend the handover period, or reduce the order quantity, then recalculate.</p>
+        {% endif %}
         <div class="stats">
             <div class="stat"><span>Lines available</span><strong>{{ production_plan.available_lines }}</strong></div>
-            <div class="stat"><span>Shifts available per day</span><strong>{{ production_plan.max_shifts }}</strong></div>
+            <div class="stat"><span>Factory shifts per day</span><strong>{{ production_plan.factory_shifts_per_day }}</strong></div>
             <div class="stat"><span>Line-shifts recommended</span><strong>{{ production_plan.recommended.line_shifts }}</strong></div>
             <div class="stat"><span>Expected output / day</span><strong>{{ "{:,.0f}".format(production_plan.recommended.daily_output) }} pcs</strong></div>
             <div class="stat"><span>Conservative output / day</span><strong>{{ "{:,.0f}".format(production_plan.recommended.daily_output_low) }} pcs</strong></div>
             <div class="stat"><span>Daily order target</span><strong>{{ "{:,.0f}".format(production_plan.daily_target) }} pcs</strong></div>
             <div class="stat"><span>Expected completion</span><strong>{{ production_plan.recommended.estimated_days }} days</strong></div>
             <div class="stat"><span>Conservative completion</span><strong>{{ production_plan.recommended.conservative_days }} days</strong></div>
-            <div class="stat"><span>Estimated output / line-shift / day (lower–upper)</span><strong>{{ "{:,.0f}".format(production_plan.rate_low) }}–{{ "{:,.0f}".format(production_plan.rate_high) }} pcs</strong></div>
+            <div class="stat"><span>Output per staffed line-shift / day (lower–expected–upper)</span><strong>{{ "{:,.0f}".format(production_plan.rate_low) }} · {{ "{:,.0f}".format(production_plan.rate_median) }} · {{ "{:,.0f}".format(production_plan.rate_high) }} pcs</strong></div>
         </div>
         <p class="assumption">Recommended basis: <b>{{ production_plan.recommended.name }}</b> ({{ production_plan.recommended.basis }}). This is a capacity estimate per fully staffed line-shift. The grade mix below shows required staffing only; match it to the supervisor's current roster and confirm machine readiness before shift release. {{ production_plan.machine_note }}</p>
-        <h3>Line-shift allocation</h3>
+        <p class="assumption">{{ production_plan.capacity_input_note }}</p>
+        <p class="assumption">The lower, expected and upper figures are pooled estimates for one staffed line-shift. They are not separate measured values for each line.</p>
+    </section>
+
+    <section class="card">
+        <h2>Capacity with one or both shifts</h2>
+        <p class="assumption">The historical order data does not identify output by shift. These are total capacity scenarios using the pooled per-line-shift range: one shift runs all available lines, or both shifts run all available lines. Current data cannot support different Shift 1 and Shift 2 performance rates.</p>
         <div class="table-wrap"><table>
-            <thead><tr><th>Line</th><th>Shift</th><th>Lower estimate</th><th>Expected estimate</th><th>Upper estimate</th></tr></thead>
-            <tbody>{% for group in production_plan.recommended.groups %}<tr>
-                <td>{{ group.line }}</td><td>{{ group.shift }}</td><td>{{ "{:,.0f}".format(production_plan.rate_low) }} pcs/day</td><td>{{ "{:,.0f}".format(production_plan.rate_median) }} pcs/day</td><td>{{ "{:,.0f}".format(production_plan.rate_high) }} pcs/day</td>
+            <thead><tr><th>Scenario</th><th>Active shifts</th><th>Lines per shift</th><th>Line-shifts / day</th><th>Required operators</th><th>Daily target</th><th>Conservative output</th><th>Expected output</th><th>Upper estimate</th></tr></thead>
+            <tbody>{% for scenario in production_plan.shift_scenarios %}<tr>
+                <td>{{ scenario.name }}</td>
+                <td>{{ scenario.active_shifts }}</td>
+                <td>{{ scenario.lines }}</td>
+                <td>{{ scenario.line_shifts }}</td>
+                <td>{{ scenario.required_operators }}</td>
+                <td>{{ "{:,.0f}".format(scenario.target_output) }} pcs</td>
+                <td>{{ "{:,.0f}".format(scenario.lower_output) }} pcs</td>
+                <td>{{ "{:,.0f}".format(scenario.expected_output) }} pcs</td>
+                <td>{{ "{:,.0f}".format(scenario.upper_output) }} pcs</td>
             </tr>{% endfor %}</tbody>
         </table></div>
     </section>
@@ -172,33 +191,34 @@
             </tbody>
         </table></div>
 
-        <h3>Shift-by-shift production plan</h3>
+        <h3>Shift staffing summary for the recommended plan</h3>
         <div class="table-wrap"><table>
-            <thead><tr><th>Shift</th><th>Lines assigned</th><th>Line-shifts</th><th>Required operators</th><th>Production target</th><th>Conservative output</th><th>Expected output</th><th>Upper estimate</th></tr></thead>
+            <thead><tr><th>Shift</th><th>Lines assigned</th><th>Line-shifts</th><th>Required operators</th><th>Production target</th></tr></thead>
             <tbody>{% for shift in production_plan.recommended.shift_summary %}<tr>
                 <td>{{ shift.shift }}</td>
                 <td>{{ shift.lines|join(', ') }}</td>
                 <td>{{ shift.line_count }}</td>
                 <td>{{ shift.required_operators }}</td>
                 <td>{{ "{:,.0f}".format(shift.target_pieces_per_day) }} pcs/day</td>
-                <td>{{ "{:,.0f}".format(shift.lower_pieces_per_day) }} pcs/day</td>
-                <td>{{ "{:,.0f}".format(shift.expected_pieces_per_day) }} pcs/day</td>
-                <td>{{ "{:,.0f}".format(shift.upper_pieces_per_day) }} pcs/day</td>
             </tr>{% endfor %}</tbody>
         </table></div>
 
-        <h3>Line-by-line assignment template</h3>
+        <h3>Day-by-day production schedule</h3>
+        <p class="assumption">Daily targets are divided into whole pieces across the recommended active line-shifts. The schedule totals exactly {{ "{:,.0f}".format(production_plan.recommended.scheduled_order_quantity) }} pcs by the end of day {{ handover_days }}. Shift targets are planning quotas; supervisors should update them using actual hourly output and downtime.</p>
         <div class="table-wrap"><table>
-            <thead><tr><th>Line</th><th>Shift</th><th>Daily target</th><th>Expected line output</th><th>Jumper</th><th>A+</th><th>A</th><th>B</th><th>C</th><th>Required total</th></tr></thead>
-            <tbody>{% for group in production_plan.recommended.groups %}<tr>
-                <td>Line {{ group.line }}</td><td>{{ group.shift }}</td>
-                <td>{{ "{:,.0f}".format(group.target_pieces_per_day) }} pcs</td>
-                <td>{{ "{:,.0f}".format(group.expected_pieces_per_day) }} pcs</td>
-                <td>{{ group.grade_requirements['Jumper'] }}</td><td>{{ group.grade_requirements['A+'] }}</td>
-                <td>{{ group.grade_requirements['A'] }}</td><td>{{ group.grade_requirements['B'] }}</td>
-                <td>{{ group.grade_requirements['C'] }}</td><td>{{ group.required_operators }}</td>
+            <thead><tr><th>Production day</th><th>Shift</th><th>Lines assigned</th><th>Line-shifts</th><th>Required operators</th><th>Shift target</th><th>Cumulative target</th></tr></thead>
+            <tbody>{% for row in production_plan.recommended.daily_schedule %}<tr>
+                <td>Day {{ row.day }}</td>
+                <td>{{ row.shift }}</td>
+                <td>{{ row.lines|join(', ') }}</td>
+                <td>{{ row.line_count }}</td>
+                <td>{{ row.required_operators }}</td>
+                <td>{{ "{:,.0f}".format(row.target_pieces) }} pcs</td>
+                <td>{{ "{:,.0f}".format(row.cumulative_target) }} pcs</td>
             </tr>{% endfor %}</tbody>
         </table></div>
+
+        <p class="assumption">This dataset records completed output at order level, not by sewing line. It cannot support a reliable line-by-line ranking. The grade mix above is the fixed staffing requirement per line-shift, not current worker availability.</p>
 
         <h3>Shift execution and control process</h3>
         <ol class="explain">{% for step in production_plan.process_steps %}<li>{{ step }}</li>{% endfor %}</ol>
@@ -207,7 +227,7 @@
 
     <section class="card">
         <h2>Capacity plan scenarios</h2>
-        <p class="assumption">These scenarios compare estimated output from different line and shift configurations. Labor cost depends on current wage, overtime and overhead rates; quality performance depends on the actual team and production controls.</p>
+        <p class="assumption">Median-rate plan uses enough line-shifts to meet the daily target at the expected rate. Conservative buffer plan calculates the required line-shifts at the lower range. Maximum available capacity uses every entered line across both shifts, even if it still misses the target. “Required / planned” compares demand with the selected scenario; the gap is line-shifts still missing.</p>
         <div class="table-wrap"><table>
             <thead><tr><th>Plan</th><th>Planning basis</th><th>Lines planned</th><th>Shifts planned / day</th><th>Line-shifts required / planned</th><th>Extra line-shifts needed</th><th>Conservative output / day</th><th>Expected output / day</th><th>Expected days</th><th>Fits handover at plan basis</th></tr></thead>
             <tbody>{% for plan in production_plan.plans %}<tr>

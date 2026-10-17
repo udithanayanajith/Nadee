@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 from model_features import build_order_features, make_intervention_features
+from line_model_features import LINE_MODEL_FEATURES, make_line_features
+from factory_config import FACTORY_SHIFTS_PER_DAY
 
 SCENARIO_LABELS = {
     "Current": "Current resources",
@@ -55,6 +57,55 @@ def predict_order_feasibility(bundle, metrics, quantity, handover_days, smv,
     }
 
 
+def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
+                             order_value, style, priority, lines, shifts,
+                             shift_hours):
+    """Predict on-time likelihood using the lines and shifts in the plan."""
+    if not bundle:
+        return {
+            "available": False,
+            "message": "Capacity-aware delivery likelihood is unavailable because its model could not be loaded.",
+        }
+    row = make_line_features(
+        quantity, handover_days, smv, order_value, style, priority,
+        lines, shifts, shift_hours,
+    )
+    training_ranges = bundle.get("training_ranges", {})
+    out_of_range = [
+        f"{feature} ({training_ranges[feature][0]:g}–{training_ranges[feature][1]:g})"
+        for feature, value in row.items()
+        if feature in training_ranges and not training_ranges[feature][0] <= value <= training_ranges[feature][1]
+    ]
+    if out_of_range:
+        return {
+            "available": False,
+            "message": (
+                "On-time likelihood is unavailable outside the training data range for "
+                + ", ".join(out_of_range)
+                + ". The production capacity estimate is still shown below."
+            ),
+        }
+    X = pd.DataFrame([row], columns=bundle["features"] or LINE_MODEL_FEATURES)
+    probabilities = bundle["model"].predict_proba(X)[0]
+    classes = list(getattr(bundle["model"], "classes_", [0, 1]))
+    positive_index = classes.index(1) if 1 in classes else len(probabilities) - 1
+    probability = float(probabilities[positive_index])
+    model_metrics = metrics or {}
+    return {
+        "available": True,
+        "probability": probability,
+        "percent": probability * 100,
+        "decision": "Higher predicted on-time likelihood" if probability >= 0.5 else "Review delivery risk",
+        "model_name": bundle.get("name", "Line-aware on-time model"),
+        "validation_auc": model_metrics.get("roc_auc"),
+        "validation_brier": model_metrics.get("brier_score"),
+        "scope_note": (
+            f"Estimate uses the entered {lines} line(s), the factory's {shifts} shifts per day, and historical order outcomes. "
+            "It is a learned likelihood, not a guarantee. Compare it with the measured capacity plan below."
+        ),
+    }
+
+
 def _scenario_profiles(interventions, orders):
     """Derive typical intervention sizes from historical scenario records."""
     required = {
@@ -64,6 +115,9 @@ def _scenario_profiles(interventions, orders):
     if not required.issubset(interventions.columns):
         return {}
     order_sizes = orders[["order_id", "order_quantity"]].copy()
+    if "n_shifts" in orders.columns:
+        order_shifts = pd.to_numeric(orders["n_shifts"], errors="coerce")
+        order_sizes = order_sizes.loc[order_shifts.le(FACTORY_SHIFTS_PER_DAY)]
     joined = interventions.merge(order_sizes, on="order_id", how="inner")
     for col in ["added_workers", "overtime_hours", "added_machines", "outsourced_qty", "order_quantity"]:
         joined[col] = pd.to_numeric(joined[col], errors="coerce")

@@ -99,143 +99,143 @@
   },
   "N2": {
     "Gradient Boosting": {
-      "accuracy": 0.9561,
-      "precision": 0.9135,
-      "recall": 0.8018,
-      "f1": 0.854,
-      "roc_auc": 0.9656,
-      "brier_score": 0.0369
-    },
-    "DNN (TensorFlow/Keras)": {
-      "accuracy": 0.9558,
-      "precision": 0.9079,
-      "recall": 0.806,
-      "f1": 0.8539,
-      "roc_auc": 0.9642,
-      "brier_score": 0.037
+      "accuracy": 0.9542,
+      "precision": 0.9039,
+      "recall": 0.797,
+      "f1": 0.8471,
+      "roc_auc": 0.9612,
+      "brier_score": 0.0386
     },
     "Histogram Gradient Boosting": {
-      "accuracy": 0.9553,
-      "precision": 0.9114,
-      "recall": 0.7987,
-      "f1": 0.8513,
-      "roc_auc": 0.9658,
-      "brier_score": 0.0371
+      "accuracy": 0.9543,
+      "precision": 0.9116,
+      "recall": 0.79,
+      "f1": 0.8465,
+      "roc_auc": 0.9603,
+      "brier_score": 0.0389
+    },
+    "DNN (TensorFlow/Keras)": {
+      "accuracy": 0.9536,
+      "precision": 0.9093,
+      "recall": 0.7873,
+      "f1": 0.8439,
+      "roc_auc": 0.9599,
+      "brier_score": 0.0389
     },
     "Random Forest": {
-      "accuracy": 0.9554,
-      "precision": 0.9161,
-      "recall": 0.7945,
-      "f1": 0.851,
-      "roc_auc": 0.9634,
-      "brier_score": 0.0373
+      "accuracy": 0.9532,
+      "precision": 0.912,
+      "recall": 0.7819,
+      "f1": 0.842,
+      "roc_auc": 0.9587,
+      "brier_score": 0.039
     },
     "Extra Trees": {
-      "accuracy": 0.9544,
-      "precision": 0.9013,
-      "recall": 0.8039,
-      "f1": 0.8498,
-      "roc_auc": 0.962,
-      "brier_score": 0.0375
+      "accuracy": 0.9537,
+      "precision": 0.9032,
+      "recall": 0.7943,
+      "f1": 0.8453,
+      "roc_auc": 0.9585,
+      "brier_score": 0.0392
     },
     "Genetic Algorithm Neural Network (GANN)": {
-      "accuracy": 0.9552,
-      "precision": 0.9062,
-      "recall": 0.8035,
-      "f1": 0.8518,
-      "roc_auc": 0.9585,
-      "brier_score": 0.0378
+      "accuracy": 0.9536,
+      "precision": 0.9126,
+      "recall": 0.7838,
+      "f1": 0.8433,
+      "roc_auc": 0.9567,
+      "brier_score": 0.0394
     },
     "Graph Neural Network (GNN)": {
-      "accuracy": 0.9552,
-      "precision": 0.9146,
-      "recall": 0.7945,
-      "f1": 0.8504,
-      "roc_auc": 0.9589,
-      "brier_score": 0.0379
+      "accuracy": 0.9529,
+      "precision": 0.9077,
+      "recall": 0.7842,
+      "f1": 0.8415,
+      "roc_auc": 0.9537,
+      "brier_score": 0.0403
     },
     "K-Nearest Neighbors": {
-      "accuracy": 0.9521,
-      "precision": 0.8925,
-      "recall": 0.797,
-      "f1": 0.842,
-      "roc_auc": 0.9512,
-      "brier_score": 0.0406
+      "accuracy": 0.9494,
+      "precision": 0.8888,
+      "recall": 0.7803,
+      "f1": 0.8311,
+      "roc_auc": 0.9476,
+      "brier_score": 0.0423
     },
     "Logistic Regression": {
-      "accuracy": 0.9466,
-      "precision": 0.8266,
-      "recall": 0.8441,
-      "f1": 0.8352,
-      "roc_auc": 0.9072,
-      "brier_score": 0.0466
+      "accuracy": 0.9426,
+      "precision": 0.8136,
+      "recall": 0.8297,
+      "f1": 0.8216,
+      "roc_auc": 0.8994,
+      "brier_score": 0.0497
     },
     "AdaBoost": {
-      "accuracy": 0.9443,
-      "precision": 0.814,
-      "recall": 0.8462,
-      "f1": 0.8298,
-      "roc_auc": 0.9278,
-      "brier_score": 0.0605
+      "accuracy": 0.9394,
+      "precision": 0.7963,
+      "recall": 0.8328,
+      "f1": 0.8141,
+      "roc_auc": 0.9213,
+      "brier_score": 0.0633
     },
     "Decision Tree": {
-      "accuracy": 0.9086,
-      "precision": 0.6694,
-      "recall": 0.8496,
-      "f1": 0.7488,
-      "roc_auc": 0.9441,
-      "brier_score": 0.0662
+      "accuracy": 0.9015,
+      "precision": 0.6455,
+      "recall": 0.8468,
+      "f1": 0.7326,
+      "roc_auc": 0.9299,
+      "brier_score": 0.0711
     },
     "Gaussian Naive Bayes": {
-      "accuracy": 0.9163,
-      "precision": 0.6975,
-      "recall": 0.8444,
-      "f1": 0.7639,
-      "roc_auc": 0.8907,
-      "brier_score": 0.0686
+      "accuracy": 0.9126,
+      "precision": 0.6866,
+      "recall": 0.8313,
+      "f1": 0.752,
+      "roc_auc": 0.8803,
+      "brier_score": 0.0721
     }
   },
   "cost": {
     "Extra Trees": {
-      "mae": 22364.94,
+      "mae": 22365.88,
       "r2": 0.9628
     },
     "Random Forest": {
-      "mae": 22998.29,
-      "r2": 0.9616
+      "mae": 22942.35,
+      "r2": 0.962
     },
     "Histogram Gradient Boosting": {
-      "mae": 23849.01,
+      "mae": 23498.79,
       "r2": 0.964
     },
     "Decision Tree": {
-      "mae": 26680.34,
-      "r2": 0.9478
+      "mae": 26816.97,
+      "r2": 0.9462
     },
     "K-Nearest Neighbors": {
-      "mae": 30922.95,
-      "r2": 0.9381
+      "mae": 31069.76,
+      "r2": 0.936
     },
     "Gradient Boosting": {
-      "mae": 31213.65,
-      "r2": 0.9331
+      "mae": 31208.14,
+      "r2": 0.9313
     },
     "AdaBoost": {
-      "mae": 52013.36,
-      "r2": 0.9146
+      "mae": 52713.41,
+      "r2": 0.9105
     },
     "Linear Regression": {
-      "mae": 93795.88,
-      "r2": 0.7805
+      "mae": 93629.38,
+      "r2": 0.7819
     }
   },
   "line_feasibility": {
-    "accuracy": 0.916,
-    "precision": 0.9316,
-    "recall": 0.9736,
-    "f1": 0.9521,
-    "roc_auc": 0.9061,
-    "brier_score": 0.0627
+    "accuracy": 0.9108,
+    "precision": 0.9281,
+    "recall": 0.9697,
+    "f1": 0.9484,
+    "roc_auc": 0.9119,
+    "brier_score": 0.0655
   },
   "workforce_performance": {
     "Extra Trees": {
@@ -252,17 +252,17 @@
     }
   },
   "line_shift_capacity": {
+    "Gradient Boosting (Huber)": {
+      "mae_standard_minutes_per_line_shift": 1055.813,
+      "r2": 0.4661
+    },
     "Extra Trees": {
-      "mae_standard_minutes_per_line_shift": 717.991,
-      "r2": 0.6357
+      "mae_standard_minutes_per_line_shift": 1089.393,
+      "r2": 0.4607
     },
     "Random Forest": {
-      "mae_standard_minutes_per_line_shift": 737.932,
-      "r2": 0.6334
-    },
-    "Gradient Boosting (Huber)": {
-      "mae_standard_minutes_per_line_shift": 793.134,
-      "r2": 0.582
+      "mae_standard_minutes_per_line_shift": 1092.776,
+      "r2": 0.4614
     }
   }
 }

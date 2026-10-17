@@ -1,4 +1,5 @@
 """Shared feature engineering used during training and live order prediction."""
+from factory_config import FACTORY_SHIFTS_PER_DAY
 SCENARIO_ENCODING = {
     name: index
     for index, name in enumerate(
@@ -22,7 +23,7 @@ def build_factory_profile(orders, allocations):
         "smv": float(orders["required_smv_total"].median()),
         "unit_value": float((orders["order_value"] / orders["order_quantity"]).median()),
         "typical_workers": float(orders["n_available_workers"].median()),
-        "typical_shifts": float(orders["n_shifts"].median()),
+        "typical_shifts": float(FACTORY_SHIFTS_PER_DAY),
         "shift_hours": float(orders["shift_hours"].median()),
         "capacity_efficiency": float(orders["avg_worker_efficiency"].median()),
         "n_conflicts": float(per_order["n_conflicts"].median()),
