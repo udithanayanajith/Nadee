@@ -23,6 +23,8 @@
         .info strong { display:block; margin-bottom:2px; color:var(--ink); }
         button { margin-top:24px; width:100%; min-height:52px; border:0; border-radius:9px; background:var(--blue); color:#fff; font:700 16px Arial,sans-serif; cursor:pointer; box-shadow:0 6px 14px rgba(23,105,224,.18); }
         button:hover { background:#0f55ba; }
+        button.smv-adjust { margin:0; width:38px; min-height:38px; padding:4px; border:1px solid var(--line); background:#f3f7fb; color:var(--ink); font-size:20px; box-shadow:none; }
+        button.smv-adjust:hover { background:#e5edf5; }
         .foot { margin-top:18px; color:#718096; font-size:12px; text-align:center; }
         @media(max-width:560px) { body { padding:18px 12px; } .form-grid { grid-template-columns:1fr; gap:14px; } }
     </style>
@@ -54,9 +56,14 @@
                     <span class="hint">How many lines can be assigned (1–30)</span>
                 </div>
                 <div>
-                    <label for="required_smv_total">SMV (minutes per piece)</label>
-                    <input id="required_smv_total" type="number" name="required_smv_total" min="0.01" step="0.01" value="{{ smv|default('12.5') }}" required>
-                    <span class="hint">Standard minute value for one garment</span>
+                    <label for="smv_display">Standard Minute Value (MM.SS)</label>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <input id="smv_display" type="text" inputmode="decimal" pattern="[0-9]+\.[0-5][0-9]" value="12.30" aria-label="SMV in minutes and seconds" required style="width:150px">
+                        <button type="button" class="smv-adjust" id="smv_second_down" aria-label="Decrease SMV by one second">−</button>
+                        <button type="button" class="smv-adjust" id="smv_second_up" aria-label="Increase SMV by one second">+</button>
+                    </div>
+                    <input id="required_smv_total" type="hidden" name="required_smv_total" value="{{ smv|default('12.5') }}">
+                    <span class="hint">MM.SS means minutes.seconds. Use +/− for one-second steps: 12.58 → 12.59 → 13.00. No minute maximum.</span>
                 </div>
                 <div>
                     <label for="order_value">Order value (LKR)</label>
@@ -90,5 +97,56 @@
         <div class="foot">This project currently uses generated sample records. Replace them with completed factory orders and actual costs before using estimates for commitments.</div>
     </section>
 </main>
+<script>
+    (() => {
+        const smvDisplay = document.getElementById('smv_display');
+        const totalInput = document.getElementById('required_smv_total');
+        const readSmvSeconds = () => {
+            const match = /^(\d+)\.(\d{2})$/.exec(smvDisplay.value.trim());
+            if (!match) return null;
+            const minutes = Number(match[1]);
+            const seconds = Number(match[2]);
+            if (!Number.isSafeInteger(minutes) || seconds > 59) return null;
+            return minutes * 60 + seconds;
+        };
+        const adjustBySecond = (amount) => {
+            const currentSeconds = readSmvSeconds();
+            if (currentSeconds !== null) setFieldsFromSeconds(currentSeconds + amount);
+        };
+
+        const setFieldsFromSeconds = (totalSeconds) => {
+            const safeSeconds = Math.max(0, Math.round(Number(totalSeconds) || 0));
+            const minutes = Math.floor(safeSeconds / 60);
+            const seconds = safeSeconds % 60;
+            smvDisplay.value = `${minutes}.${String(seconds).padStart(2, '0')}`;
+            totalInput.value = (safeSeconds / 60).toFixed(6);
+        };
+
+        const syncTotal = (normalize = false) => {
+            const totalSeconds = readSmvSeconds();
+            if (totalSeconds === null) {
+                totalInput.value = '';
+                return false;
+            }
+            if (normalize) setFieldsFromSeconds(totalSeconds);
+            else totalInput.value = (totalSeconds / 60).toFixed(6);
+            return true;
+        };
+
+        setFieldsFromSeconds(Math.round((Number(totalInput.value) || 0) * 60));
+        smvDisplay.addEventListener('input', () => syncTotal(false));
+        smvDisplay.addEventListener('change', () => syncTotal(true));
+        document.getElementById('smv_second_down').addEventListener('click', () => adjustBySecond(-1));
+        document.getElementById('smv_second_up').addEventListener('click', () => adjustBySecond(1));
+        document.querySelector('form').addEventListener('submit', (event) => {
+            if (!syncTotal(true)) {
+                event.preventDefault();
+                smvDisplay.setCustomValidity('Enter SMV as minutes.seconds, with seconds from 00 to 59 (for example, 12.58).');
+                smvDisplay.reportValidity();
+            }
+        });
+        smvDisplay.addEventListener('input', () => smvDisplay.setCustomValidity(''));
+    })();
+</script>
 </body>
 </html>

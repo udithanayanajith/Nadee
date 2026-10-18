@@ -51,6 +51,7 @@
             {% if n1_analysis.available %}
             <div class="prob">{{ "%.2f"|format(n1_analysis.percent) }}%</div>
             <div style="color:#64748b">Estimated likelihood · {{ production_plan.available_lines }} lines · {{ production_plan.factory_shifts_per_day }} shifts</div>
+            {% if n1_analysis.extrapolation_note %}<div class="assumption" style="margin-top:12px">{{ n1_analysis.extrapolation_note }}</div>{% endif %}
             {% else %}
             <div style="margin:10px 0;color:#64748b">{{ n1_analysis.message }}</div>
             {% endif %}
@@ -64,7 +65,8 @@
         <h2>Calculated order and capacity details</h2>
         <div class="stats">
             <div class="stat"><span>Handover lead time</span><strong>{{ handover_days }} days</strong></div>
-            <div class="stat"><span>SMV</span><strong>{{ "%.2f"|format(estimated_smv) }} min / piece</strong></div>
+            {% set smv_total_seconds = (estimated_smv * 60)|round|int %}
+            <div class="stat"><span>SMV</span><strong>{{ smv_total_seconds // 60 }}.{{ "%02d"|format(smv_total_seconds % 60) }} min / piece</strong></div>
             <div class="stat"><span>Order value</span><strong>LKR {{ "{:,.0f}".format(estimated_order_value) }}</strong></div>
             <div class="stat"><span>Style</span><strong>{{ style }}</strong></div>
             <div class="stat"><span>Priority</span><strong>{{ priority }}</strong></div>

@@ -76,15 +76,6 @@ def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
         for feature, value in row.items()
         if feature in training_ranges and not training_ranges[feature][0] <= value <= training_ranges[feature][1]
     ]
-    if out_of_range:
-        return {
-            "available": False,
-            "message": (
-                "On-time likelihood is unavailable outside the training data range for "
-                + ", ".join(out_of_range)
-                + ". The production capacity estimate is still shown below."
-            ),
-        }
     X = pd.DataFrame([row], columns=bundle["features"] or LINE_MODEL_FEATURES)
     probabilities = bundle["model"].predict_proba(X)[0]
     classes = list(getattr(bundle["model"], "classes_", [0, 1]))
@@ -102,6 +93,12 @@ def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
         "scope_note": (
             f"Estimate uses the entered {lines} line(s), the factory's {shifts} shifts per day, and historical order outcomes. "
             "It is a learned likelihood, not a guarantee. Compare it with the measured capacity plan below."
+        ),
+        "extrapolation_note": (
+            "This likelihood is an extrapolation because the entered capacity is outside the model's training data range for "
+            + ", ".join(out_of_range)
+            + ". Treat it as indicative and rely on the production capacity plan for staffing decisions."
+            if out_of_range else None
         ),
     }
 
