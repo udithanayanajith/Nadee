@@ -1,5 +1,23 @@
 {
   "N1": {
+    "DNN (TensorFlow/Keras)": {
+      "accuracy": 0.8697,
+      "precision": 0.9031,
+      "recall": 0.9453,
+      "f1": 0.9237,
+      "roc_auc": 0.8631,
+      "brier_score": 0.0932,
+      "confusion_matrix": [
+        [
+          243,
+          254
+        ],
+        [
+          137,
+          2366
+        ]
+      ]
+    },
     "Extra Trees": {
       "accuracy": 0.8713,
       "precision": 0.8907,
@@ -127,20 +145,20 @@
       ]
     },
     "Histogram Gradient Boosting": {
-      "accuracy": 0.8583,
-      "precision": 0.8921,
-      "recall": 0.9445,
-      "f1": 0.9175,
-      "roc_auc": 0.8483,
-      "brier_score": 0.1017,
+      "accuracy": 0.857,
+      "precision": 0.891,
+      "recall": 0.9441,
+      "f1": 0.9168,
+      "roc_auc": 0.8487,
+      "brier_score": 0.1018,
       "confusion_matrix": [
         [
-          211,
-          286
+          208,
+          289
         ],
         [
-          139,
-          2364
+          140,
+          2363
         ]
       ]
     },
@@ -201,146 +219,164 @@
   },
   "N2": {
     "Gradient Boosting": {
-      "accuracy": 0.9557,
-      "precision": 0.9037,
-      "recall": 0.8037,
-      "f1": 0.8508,
-      "roc_auc": 0.9604,
+      "accuracy": 0.9554,
+      "precision": 0.9023,
+      "recall": 0.8033,
+      "f1": 0.8499,
+      "roc_auc": 0.9607,
       "brier_score": 0.0378,
+      "confusion_matrix": [
+        [
+          14927,
+          246
+        ],
+        [
+          556,
+          2271
+        ]
+      ]
+    },
+    "DNN (TensorFlow/Keras)": {
+      "accuracy": 0.9553,
+      "precision": 0.9038,
+      "recall": 0.8008,
+      "f1": 0.8492,
+      "roc_auc": 0.9601,
+      "brier_score": 0.0378,
+      "confusion_matrix": [
+        [
+          14932,
+          241
+        ],
+        [
+          563,
+          2264
+        ]
+      ]
+    },
+    "Histogram Gradient Boosting": {
+      "accuracy": 0.9552,
+      "precision": 0.9073,
+      "recall": 0.7963,
+      "f1": 0.8482,
+      "roc_auc": 0.9592,
+      "brier_score": 0.0379,
+      "confusion_matrix": [
+        [
+          14943,
+          230
+        ],
+        [
+          576,
+          2251
+        ]
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 0.955,
+      "precision": 0.9121,
+      "recall": 0.7895,
+      "f1": 0.8464,
+      "roc_auc": 0.9585,
+      "brier_score": 0.038,
+      "confusion_matrix": [
+        [
+          14958,
+          215
+        ],
+        [
+          595,
+          2232
+        ]
+      ]
+    },
+    "Graph Neural Network (GNN)": {
+      "accuracy": 0.9549,
+      "precision": 0.9019,
+      "recall": 0.7998,
+      "f1": 0.8478,
+      "roc_auc": 0.9587,
+      "brier_score": 0.0381,
+      "confusion_matrix": [
+        [
+          14927,
+          246
+        ],
+        [
+          566,
+          2261
+        ]
+      ]
+    },
+    "Extra Trees": {
+      "accuracy": 0.9544,
+      "precision": 0.9028,
+      "recall": 0.7952,
+      "f1": 0.8456,
+      "roc_auc": 0.9571,
+      "brier_score": 0.0382,
       "confusion_matrix": [
         [
           14931,
           242
         ],
         [
-          555,
-          2272
-        ]
-      ]
-    },
-    "Histogram Gradient Boosting": {
-      "accuracy": 0.9551,
-      "precision": 0.9069,
-      "recall": 0.7955,
-      "f1": 0.8476,
-      "roc_auc": 0.9592,
-      "brier_score": 0.0379,
-      "confusion_matrix": [
-        [
-          14942,
-          231
-        ],
-        [
-          578,
-          2249
-        ]
-      ]
-    },
-    "Random Forest": {
-      "accuracy": 0.9548,
-      "precision": 0.91,
-      "recall": 0.7902,
-      "f1": 0.8459,
-      "roc_auc": 0.9588,
-      "brier_score": 0.0379,
-      "confusion_matrix": [
-        [
-          14952,
-          221
-        ],
-        [
-          593,
-          2234
-        ]
-      ]
-    },
-    "Graph Neural Network (GNN)": {
-      "accuracy": 0.9546,
-      "precision": 0.9088,
-      "recall": 0.7899,
-      "f1": 0.8452,
-      "roc_auc": 0.9586,
-      "brier_score": 0.038,
-      "confusion_matrix": [
-        [
-          14949,
-          224
-        ],
-        [
-          594,
-          2233
-        ]
-      ]
-    },
-    "Extra Trees": {
-      "accuracy": 0.9546,
-      "precision": 0.9013,
-      "recall": 0.798,
-      "f1": 0.8465,
-      "roc_auc": 0.9566,
-      "brier_score": 0.0382,
-      "confusion_matrix": [
-        [
-          14926,
-          247
-        ],
-        [
-          571,
-          2256
+          579,
+          2248
         ]
       ]
     },
     "Genetic Algorithm Neural Network (GANN)": {
-      "accuracy": 0.9548,
-      "precision": 0.9144,
-      "recall": 0.786,
-      "f1": 0.8453,
-      "roc_auc": 0.9576,
+      "accuracy": 0.9544,
+      "precision": 0.9166,
+      "recall": 0.781,
+      "f1": 0.8434,
+      "roc_auc": 0.9577,
       "brier_score": 0.0383,
       "confusion_matrix": [
         [
-          14965,
-          208
+          14972,
+          201
         ],
         [
-          605,
-          2222
+          619,
+          2208
         ]
       ]
     },
     "K-Nearest Neighbors": {
-      "accuracy": 0.9512,
-      "precision": 0.8868,
-      "recall": 0.7899,
-      "f1": 0.8355,
-      "roc_auc": 0.9446,
+      "accuracy": 0.9514,
+      "precision": 0.8901,
+      "recall": 0.7878,
+      "f1": 0.8358,
+      "roc_auc": 0.9448,
       "brier_score": 0.0409,
       "confusion_matrix": [
         [
-          14888,
-          285
+          14898,
+          275
         ],
         [
-          594,
-          2233
+          600,
+          2227
         ]
       ]
     },
     "Logistic Regression": {
-      "accuracy": 0.9447,
-      "precision": 0.8163,
-      "recall": 0.8362,
-      "f1": 0.8261,
-      "roc_auc": 0.9041,
+      "accuracy": 0.9449,
+      "precision": 0.8167,
+      "recall": 0.8369,
+      "f1": 0.8267,
+      "roc_auc": 0.9049,
       "brier_score": 0.0478,
       "confusion_matrix": [
         [
-          14641,
-          532
+          14642,
+          531
         ],
         [
-          463,
-          2364
+          461,
+          2366
         ]
       ]
     },
@@ -349,8 +385,8 @@
       "precision": 0.7907,
       "recall": 0.8391,
       "f1": 0.8141,
-      "roc_auc": 0.9138,
-      "brier_score": 0.0627,
+      "roc_auc": 0.9076,
+      "brier_score": 0.0629,
       "confusion_matrix": [
         [
           14545,
@@ -363,74 +399,74 @@
       ]
     },
     "Decision Tree": {
-      "accuracy": 0.9057,
-      "precision": 0.6522,
-      "recall": 0.8557,
-      "f1": 0.7402,
-      "roc_auc": 0.9408,
-      "brier_score": 0.0673,
+      "accuracy": 0.9076,
+      "precision": 0.6586,
+      "recall": 0.8543,
+      "f1": 0.7438,
+      "roc_auc": 0.9342,
+      "brier_score": 0.0684,
       "confusion_matrix": [
         [
-          13883,
-          1290
+          13921,
+          1252
         ],
         [
-          408,
-          2419
+          412,
+          2415
         ]
       ]
     },
     "Gaussian Naive Bayes": {
       "accuracy": 0.9114,
-      "precision": 0.6764,
-      "recall": 0.8362,
-      "f1": 0.7479,
-      "roc_auc": 0.8841,
-      "brier_score": 0.0729,
+      "precision": 0.6763,
+      "recall": 0.8359,
+      "f1": 0.7477,
+      "roc_auc": 0.8845,
+      "brier_score": 0.0728,
       "confusion_matrix": [
         [
           14042,
           1131
         ],
         [
-          463,
-          2364
+          464,
+          2363
         ]
       ]
     }
   },
   "cost": {
     "Extra Trees": {
-      "mae": 22068.28,
-      "r2": 0.9669
+      "mae": 22050.35,
+      "r2": 0.9667
     },
     "Random Forest": {
-      "mae": 22575.64,
-      "r2": 0.9651
+      "mae": 22749.24,
+      "r2": 0.9644
     },
     "Histogram Gradient Boosting": {
-      "mae": 23239.02,
-      "r2": 0.9664
+      "mae": 22832.64,
+      "r2": 0.9675
     },
     "Decision Tree": {
-      "mae": 26260.13,
-      "r2": 0.9508
+      "mae": 26259.33,
+      "r2": 0.9507
     },
     "Gradient Boosting": {
-      "mae": 30609.74,
-      "r2": 0.937
+      "mae": 30716.83,
+      "r2": 0.9375
     },
     "K-Nearest Neighbors": {
-      "mae": 30710.54,
-      "r2": 0.9412
+      "mae": 30763.61,
+      "r2": 0.9413
     },
     "AdaBoost": {
-      "mae": 49720.01,
-      "r2": 0.9222
+      "mae": 50428.74,
+      "r2": 0.9207
     },
     "Linear Regression": {
-      "mae": 94301.37,
-      "r2": 0.7791
+      "mae": 94494.47,
+      "r2": 0.7799
     }
   },
   "line_feasibility": {
@@ -453,30 +489,30 @@
   },
   "workforce_performance": {
     "Extra Trees": {
-      "efficiency_mae": 3.269,
-      "efficiency_r2": 0.8613,
-      "quality_mae": 2.346,
-      "quality_r2": 0.9106
+      "efficiency_mae": 3.266,
+      "efficiency_r2": 0.8615,
+      "quality_mae": 2.35,
+      "quality_r2": 0.9104
     },
     "Random Forest": {
-      "efficiency_mae": 3.239,
-      "efficiency_r2": 0.8637,
-      "quality_mae": 2.326,
-      "quality_r2": 0.9124
+      "efficiency_mae": 3.235,
+      "efficiency_r2": 0.8641,
+      "quality_mae": 2.329,
+      "quality_r2": 0.9123
     }
   },
   "line_shift_capacity": {
     "Gradient Boosting (Huber)": {
-      "mae_standard_minutes_per_line_shift": 1044.999,
-      "r2": 0.4839
+      "mae_standard_minutes_per_line_shift": 1043.802,
+      "r2": 0.4892
     },
     "Extra Trees": {
-      "mae_standard_minutes_per_line_shift": 1076.591,
-      "r2": 0.4795
+      "mae_standard_minutes_per_line_shift": 1078.046,
+      "r2": 0.4783
     },
     "Random Forest": {
-      "mae_standard_minutes_per_line_shift": 1091.239,
-      "r2": 0.4718
+      "mae_standard_minutes_per_line_shift": 1096.186,
+      "r2": 0.464
     }
   }
 }
