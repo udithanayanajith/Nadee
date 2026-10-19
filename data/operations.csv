@@ -1,13 +1,13 @@
 operation_id,operation_name,operation_category,machine_type_required,smv,sequence_no,complexity_score,quality_requirement
-1,Collar attach,Critical,Overlock,0.82,1,6.33,90.32
-2,Collar topst,Basic,Flatlock,3.48,2,4.82,97.27
-3,Sleeve attach,Intermediate,Kansai,2.15,3,9.17,93.45
-4,Sleeve hem,Basic,Overlock,0.89,4,3.84,91.8
-5,Side seam,Critical,Bartack,2.54,5,5.33,97.43
-6,Bottom hem,Intermediate,Buttonhole,2.23,6,9.87,88.72
-7,Cuff attach,Critical,Flatlock,1.9,7,7.67,97.1
-8,Placket attach,Basic,Overlock,2.16,8,1.03,93.02
-9,Pocket attach,Intermediate,Flatlock,2.79,9,3.79,94.11
-10,Label attach,Intermediate,Overlock,2.66,10,4.8,91.53
-11,Shoulder attach,Critical,Flatlock,2.19,11,6.37,95.55
-12,Neck piping,Intermediate,Overlock,2.34,12,3.57,89.47
+1,Collar attach,Intermediate,SNLS,2.13,1,1.94,96.29
+2,Collar topst,Basic,Bartack,1.64,2,8.27,88.84
+3,Sleeve attach,Intermediate,Flatlock,3.33,3,7.12,96.93
+4,Sleeve hem,Basic,Buttonhole,0.71,4,8.87,91.09
+5,Side seam,Intermediate,Bartack,2.78,5,5.69,95.81
+6,Bottom hem,Intermediate,Kansai,2.08,6,7.75,89.7
+7,Cuff attach,Intermediate,Bartack,1.32,7,6.61,89.46
+8,Placket attach,Intermediate,Kansai,0.96,8,8.71,97.4
+9,Pocket attach,Intermediate,SNLS,1.6,9,8.73,93.04
+10,Label attach,Basic,Bartack,3.16,10,4.97,93.04
+11,Shoulder attach,Intermediate,Buttonhole,2.71,11,8.54,96.62
+12,Neck piping,Basic,Flatlock,1.49,12,6.02,88.21

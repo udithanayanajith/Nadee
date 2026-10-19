@@ -5,7 +5,11 @@ import numpy as np
 import pandas as pd
 
 from model_features import build_order_features, make_intervention_features
-from line_model_features import LINE_MODEL_FEATURES, make_line_features
+from line_model_features import (
+    FEASIBILITY_ACCEPT_THRESHOLD,
+    LINE_MODEL_FEATURES,
+    make_line_features,
+)
 from factory_config import FACTORY_SHIFTS_PER_DAY
 
 SCENARIO_LABELS = {
@@ -45,7 +49,7 @@ def predict_order_feasibility(bundle, metrics, quantity, handover_days, smv,
         "available": True,
         "probability": probability,
         "percent": probability * 100,
-        "decision": "Higher predicted on-time likelihood" if probability >= 0.5 else "Review delivery risk",
+        "decision": _likelihood_interpretation(probability),
         "model_name": bundle.get("name", "N1 classifier"),
         "validation_auc": model_metrics.get("roc_auc"),
         "validation_brier": model_metrics.get("brier_score"),
@@ -60,11 +64,11 @@ def predict_order_feasibility(bundle, metrics, quantity, handover_days, smv,
 def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
                              order_value, style, priority, lines, shifts,
                              shift_hours):
-    """Predict on-time likelihood using the lines and shifts in the plan."""
+    """Predict feasibility acceptance probability using the planned lines/shifts."""
     if not bundle:
         return {
             "available": False,
-            "message": "Capacity-aware delivery likelihood is unavailable because its model could not be loaded.",
+            "message": "Accept/Reject feasibility is unavailable. Run train.py to build the model from order_status labels.",
         }
     row = make_line_features(
         quantity, handover_days, smv, order_value, style, priority,
@@ -86,13 +90,14 @@ def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
         "available": True,
         "probability": probability,
         "percent": probability * 100,
-        "decision": "Higher predicted on-time likelihood" if probability >= 0.5 else "Review delivery risk",
-        "model_name": bundle.get("name", "Line-aware on-time model"),
+        "decision": "Accept" if probability >= FEASIBILITY_ACCEPT_THRESHOLD else "Reject",
+        "model_name": bundle.get("name", "Feasibility Logistic Regression"),
         "validation_auc": model_metrics.get("roc_auc"),
         "validation_brier": model_metrics.get("brier_score"),
         "scope_note": (
-            f"Estimate uses the entered {lines} line(s), the factory's {shifts} shifts per day, and historical order outcomes. "
-            "It is a learned likelihood, not a guarantee. Compare it with the measured capacity plan below."
+            f"The model estimates how often similar orders were accepted with the entered {lines} line(s) "
+            f"and {shifts} shifts per day. The app recommends Accept when this predicted acceptance probability is at least "
+            f"{FEASIBILITY_ACCEPT_THRESHOLD:.0%}. This is a decision aid; check the production capacity plan before committing."
         ),
         "extrapolation_note": (
             "This likelihood is an extrapolation because the entered capacity is outside the model's training data range for "
@@ -101,6 +106,13 @@ def predict_line_feasibility(bundle, metrics, quantity, handover_days, smv,
             if out_of_range else None
         ),
     }
+
+
+def _likelihood_interpretation(probability):
+    """Interpret feasibility probability with the configured acceptance cutoff."""
+    if probability >= 0.70:
+        return "Accept (predicted acceptance probability is at least 70%)"
+    return "Reject (predicted acceptance probability is below 70%)"
 
 
 def _scenario_profiles(interventions, orders):

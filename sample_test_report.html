@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="si">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Planning App - Sample Test Report</title>
+<style>
+body{font:15px/1.55 Arial,sans-serif;margin:0;background:#f3f6fa;color:#172b3d}.wrap{max-width:1200px;margin:28px auto;padding:0 18px}h1,h2{color:#123d60}.card{background:white;border:1px solid #dce5ed;border-radius:12px;padding:18px;margin:16px 0}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.tile{background:#f4f8fb;padding:12px;border-radius:8px}.tile b{display:block;font-size:20px;color:#1263a3}.tablebox{overflow:auto}table{border-collapse:collapse;width:100%;min-width:1000px}th,td{padding:9px;border-bottom:1px solid #e4ebf0;text-align:left;white-space:nowrap}th{background:#eaf1f6;position:sticky;top:0}.yes{color:#a32a37;font-weight:bold}.no{color:#167344;font-weight:bold}.note{background:#fff6e5;border-left:4px solid #d89b20;padding:12px}.bad{background:#fff0ef;border-left:4px solid #c43a3a;padding:12px}.muted{color:#596d7d;font-size:13px}code{background:#edf2f6;padding:2px 5px;border-radius:4px}</style>
+</head><body><main class="wrap">
+<h1>ඇණවුම් සැලසුම් පද්ධතියේ පරීක්ෂණ වාර්තාව</h1>
+<p>පරීක්ෂා කළේ: <a href="http://127.0.0.1:5000/">ඇණවුම් ඇතුළත් කිරීමේ පිටුව</a> සහ එහි ප්‍රතිඵල පිටුව. පරීක්ෂණ 24ක් එකින් එක ඇතුළත් කර, ලැබුණු පිළිගැනීමේ ප්‍රතිශතය, තීරණය සහ නිෂ්පාදන ධාරිතා සැලැස්ම සටහන් කළා.</p>
+<section class="card"><h2>ප්‍රධාන ප්‍රතිඵල</h2><div class="summary">
+<div class="tile"><b>24</b>පරීක්ෂණ ආදාන</div><div class="tile"><b>0.73% – 100%</b>ලැබුණු සම්භාවිතා පරාසය</div><div class="tile"><b>0.810</b>පිටුවේ දැක්වූ ආකෘති ROC-AUC</div><div class="tile"><b>0.111</b>පිටුවේ දැක්වූ Brier අගය</div><div class="tile"><b>3</b>පිළිගන්න කියමින් නැවත සැලසුම් කළ යුතු වූ අවස්ථා</div></div>
+<p class="note"><b>සම්භාවිතා පරාසය ගැන:</b> මේ පරීක්ෂණවලින් 0% හරියටම ලැබුණේ නැහැ. අඩුම ප්‍රතිඵලය 0.73%යි; ඉහළම ප්‍රතිඵලය 100%යි. ඒ නිසා සම්භාවිතාව 0 සිට 100 දක්වා අගයන් දෙන්න පුළුවන් බව පෙනුණත්, සම්පූර්ණ පරාසයේ හැම අගයක්ම නිවැරදිව පරීක්ෂා කළා කියන්න බැහැ.</p>
+<p class="bad"><b>වැදගත් සොයාගැනීම:</b> අවස්ථා 3කදී පද්ධතිය 89.95%–95.00% පිළිගැනීමක් පෙන්වූවත්, දී ඇති කාලය තුළ නිෂ්පාදනය අවසන් කළ නොහැකි බව capacity සැලැස්ම කියා නැවත සැලසුම් කිරීමට සිදුවුණා. එබැවින් “Accept” තීරණය යනු deadline එකට නිෂ්පාදනය නිම කළ හැකි බවට සහතිකයක් නොවේ. තීරණ දෙක වෙන්ව පෙන්විය යුතුයි: ඇණවුම පිළිගැනීමේ ප්‍රවණතාව සහ නිෂ්පාදන ධාරිතාව.</p>
+</section>
+<section class="card"><h2>පරීක්ෂණ ප්‍රතිඵල</h2><div class="tablebox"><table><thead><tr><th>#</th><th>ප්‍රමාණය</th><th>දින</th><th>රේඛා</th><th>SMV</th><th>ඇඳුම් වර්ගය</th><th>ප්‍රමුඛතාව</th><th>පිළිගැනීමේ සම්භාවිතාව</th><th>තීරණය</th><th>අවසන් කිරීමට ඇස්තමේන්තු දින</th><th>නැවත සැලසුම්?</th></tr></thead><tbody>
+<tr><td>1</td><td>1,000</td><td>60</td><td>30</td><td>5.00</td><td>T-Shirt</td><td>Low</td><td>100.00%</td><td>Accept</td><td>5</td><td class="no">නැහැ</td></tr>
+<tr><td>2</td><td>5,000</td><td>30</td><td>20</td><td>8.00</td><td>Legging</td><td>Low</td><td>100.00%</td><td>Accept</td><td>29</td><td class="no">නැහැ</td></tr>
+<tr><td>3</td><td>10,000</td><td>20</td><td>10</td><td>10.00</td><td>Polo</td><td>Normal</td><td>100.00%</td><td>Accept</td><td>5</td><td class="no">නැහැ</td></tr>
+<tr><td>4</td><td>10,000</td><td>10</td><td>4</td><td>12.30</td><td>Polo</td><td>Normal</td><td>95.94%</td><td>Accept</td><td>7</td><td class="no">නැහැ</td></tr>
+<tr><td>5</td><td>10,000</td><td>7</td><td>1</td><td>12.30</td><td>Polo</td><td>Normal</td><td>68.18%</td><td>Reject</td><td>18</td><td class="yes">ඔව්</td></tr>
+<tr><td>6</td><td>30,000</td><td>20</td><td>8</td><td>15.00</td><td>Jacket</td><td>High</td><td>92.55%</td><td>Accept</td><td>19</td><td class="no">නැහැ</td></tr>
+<tr><td>7</td><td>50,000</td><td>10</td><td>4</td><td>20.00</td><td>Hoodie</td><td>High</td><td>21.66%</td><td>Reject</td><td>47</td><td class="yes">ඔව්</td></tr>
+<tr><td>8</td><td>100,000</td><td>5</td><td>2</td><td>25.00</td><td>Jacket</td><td>High</td><td>1.07%</td><td>Reject</td><td>204</td><td class="yes">ඔව්</td></tr>
+<tr><td>9</td><td>100,000</td><td>1</td><td>1</td><td>30.00</td><td>Hoodie</td><td>High</td><td>0.73%</td><td>Reject</td><td>553</td><td class="yes">ඔව්</td></tr>
+<tr><td>10</td><td>2,000</td><td>10</td><td>2</td><td>8.00</td><td>T-Shirt</td><td>Low</td><td>100.00%</td><td>Accept</td><td>8</td><td class="no">නැහැ</td></tr>
+<tr><td>11</td><td>25,000</td><td>15</td><td>6</td><td>12.30</td><td>Polo</td><td>Normal</td><td>92.90%</td><td>Accept</td><td>18</td><td class="yes">ඔව්</td></tr>
+<tr><td>12</td><td>75,000</td><td>30</td><td>15</td><td>18.00</td><td>Legging</td><td>Normal</td><td>84.42%</td><td>Accept</td><td>30</td><td class="no">නැහැ</td></tr>
+<tr><td>13</td><td>50,000</td><td>20</td><td>12</td><td>6.00</td><td>T-Shirt</td><td>Low</td><td>99.81%</td><td>Accept</td><td>20</td><td class="no">නැහැ</td></tr>
+<tr><td>14</td><td>10,000</td><td>5</td><td>6</td><td>10.00</td><td>Polo</td><td>High</td><td>95.00%</td><td>Accept</td><td>6</td><td class="yes">ඔව්</td></tr>
+<tr><td>15</td><td>30,000</td><td>7</td><td>3</td><td>12.30</td><td>Jacket</td><td>Normal</td><td>52.48%</td><td>Reject</td><td>21</td><td class="yes">ඔව්</td></tr>
+<tr><td>16</td><td>15,000</td><td>14</td><td>5</td><td>9.00</td><td>Legging</td><td>Low</td><td>99.13%</td><td>Accept</td><td>9</td><td class="no">නැහැ</td></tr>
+<tr><td>17</td><td>90,000</td><td>10</td><td>8</td><td>22.00</td><td>Hoodie</td><td>High</td><td>5.23%</td><td>Reject</td><td>46</td><td class="yes">ඔව්</td></tr>
+<tr><td>18</td><td>5,000</td><td>3</td><td>1</td><td>18.00</td><td>Jacket</td><td>High</td><td>60.45%</td><td>Reject</td><td>15</td><td class="yes">ඔව්</td></tr>
+<tr><td>19</td><td>100,000</td><td>30</td><td>30</td><td>5.00</td><td>T-Shirt</td><td>Low</td><td>100.00%</td><td>Accept</td><td>10</td><td class="no">නැහැ</td></tr>
+<tr><td>20</td><td>40,000</td><td>14</td><td>10</td><td>14.00</td><td>Polo</td><td>Normal</td><td>89.95%</td><td>Accept</td><td>19</td><td class="yes">ඔව්</td></tr>
+<tr><td>21</td><td>20,000</td><td>7</td><td>15</td><td>16.00</td><td>Hoodie</td><td>High</td><td>98.11%</td><td>Accept</td><td>7</td><td class="no">නැහැ</td></tr>
+<tr><td>22</td><td>80,000</td><td>21</td><td>4</td><td>12.00</td><td>Legging</td><td>Normal</td><td>11.85%</td><td>Reject</td><td>78</td><td class="yes">ඔව්</td></tr>
+<tr><td>23</td><td>1,000</td><td>2</td><td>1</td><td>30.00</td><td>Jacket</td><td>High</td><td>61.54%</td><td>Reject</td><td>5</td><td class="yes">ඔව්</td></tr>
+<tr><td>24</td><td>250,000</td><td>60</td><td>30</td><td>8.00</td><td>T-Shirt</td><td>Low</td><td>31.37%</td><td>Reject</td><td>59</td><td class="no">නැහැ</td></tr>
+</tbody></table></div><p class="muted">SMV අගය MM.SS ආකෘතියෙන් ඇතුළත් කළා. පද්ධතියේ දිනකට වැඩ මුර දෙකක සැකසුම ස්වයංක්‍රීයව භාවිතා වුණා. වාර්තාවේ ප්‍රතිඵල එම මොහොතේ ධාවනය වූ local app එකෙන් ලැබුණු ඒවා.</p></section>
+<section class="card"><h2>සොයාගත් දේ සහ ඊළඟ නිවැරදි කිරීම</h2><ol><li>පිළිගැනීමේ සම්භාවිතාව සහ ධාරිතාව වෙන වෙනම ගණනය වෙනවා. ඉහළ සම්භාවිතාවක් තිබුණත් deadline එකට නිෂ්පාදනය නොහැකි වෙන්න පුළුවන්; ප්‍රතිඵල පිටුවේ ඒ දෙක එකිනෙකට පැහැදිලිව වෙන් කර පෙන්විය යුතුයි.</li><li>අවස්ථා 1 සහ 2 හි අවසන් දින ගණන 60 සහ 30ට ආසන්න වුණත් “නැවත සැලසුම්” පණිවිඩයක් නැහැ. නිෂ්පාදන දින ගණන deadline එකට සමාන හෝ වැඩි නම්, රවුම් කිරීමෙන් පසුවත් එය පරීක්ෂා කරනවාද කියා නීතිය තවදුරටත් පරීක්ෂා කළ යුතුයි.</li><li>100% සහ 0.73% වැනි අන්ත අගයන් පෙන්වීමෙන්ම ඒවායේ නිරවද්‍යතාව තහවුරු වෙන්නේ නැහැ. දැනට තිබෙන දත්ත උදාහරණ සඳහා පමණක් සකස් කළ ඒවායි. එබැවින් කර්මාන්තශාලාවේ සැබෑ පිළිගැනීමේ සහ ප්‍රතික්ෂේප කිරීමේ තීරණ යොදා ආකෘතිය පරීක්ෂා කළ යුතුයි.</li><li>මෙම පරීක්ෂණයේ ප්‍රතිඵල අදාළ වන්නේ එම මොහොතේ ධාවනය වූ යෙදුමට, ආකෘතියට සහ දත්තවලට පමණයි. සැබෑ නිෂ්двэрණ ප්‍රතිඵල සඳහා සහතිකයක් නොවේ.</li></ol></section>
+<p class="muted">Файл: sample_test_report.html · App: <code>http://127.0.0.1:5000/</code></p>
+</main></body></html>
+

@@ -10,9 +10,10 @@ import pandas as pd
 import os
 import sys
 from datetime import datetime, timedelta
+from line_model_features import acceptance_label, historical_line_count, make_line_features
 
 if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
 
 np.random.seed(42)
 os.makedirs("data", exist_ok=True)
@@ -78,6 +79,15 @@ for i in range(1, N_ORDERS + 1):
     p_ontime = 1.0 / (1.0 + np.exp(-logit))
     p_ontime = float(np.clip(p_ontime, 0.02, 0.98))
 
+    # Synthetic accept/reject decisions use the same planned line features as
+    # the live classifier, with decision noise so sample probabilities are not
+    # a hard-coded 0%/100% capacity rule. Real records should use actual decisions.
+    planned_lines = historical_line_count(n_available_workers)
+    acceptance_features = make_line_features(
+        qty, handover_d, smv_total, order_val, style, priority,
+        planned_lines, n_shifts, shift_hours,
+    )
+
     on_time = 1 if np.random.rand() < p_ontime else 0
 
     # ---- Consistent completion dates ----
@@ -115,7 +125,9 @@ for i in range(1, N_ORDERS + 1):
         "actual_completion_date": actual_completion.date(),
         "actual_completed_qty": actual_completed_qty,
         "on_time_flag": on_time,
-        "order_status": "Accepted"
+        "order_status": acceptance_label(
+            acceptance_features["line_capacity_coverage"], i,
+        )
     })
 
 df_orders = pd.DataFrame(orders)

@@ -11,7 +11,7 @@ The order form takes these values:
 - Style
 - Priority
 
-The live result uses the line-aware on-time model (entered lines and the factory's two shifts), N2 intervention/cost comparisons, and the N5 line-shift production plan. N2 compares intervention patterns whose sizes are taken from one/two-shift scenario medians; its historical choice score is not a delivery improvement probability. The N2 cost model estimates costs from recorded scenario cost targets. N5 supplies a pooled per-line-shift output range and a grade-based staffing requirement.
+The live result uses a logistic regression classifier trained on `order_status` Accept/Reject decisions, N2 intervention/cost comparisons, and the N5 line-shift production plan. Synthetic `order_status` values are sampled from a smooth acceptance rate based on the same planned line-capacity features, so the sample classifier has uncertainty instead of learning a hard 0%/100% rule. `on_time_flag` remains the separate observed delivery outcome. The live recommendation uses a 70% predicted acceptance-probability cutoff; the production plan separately estimates output and required line-shifts. Replace the generated decisions with actual factory accept/reject records before relying on probabilities.
 
 ## Train
 
@@ -24,7 +24,7 @@ N5 learns standard garment minutes completed per 8-hour line-shift from complete
 
 `train.py` trains and compares the order and intervention models, and also evaluates line-feasibility and worker-operation models. The live on-time likelihood uses submitted line count and two shifts; the capacity plan separately estimates actual output against the deadline. Neither score guarantees an order outcome.
 
-The line-aware model uses historical worker headcount mapped to 17-operator line equivalents, shifts per day, order details, and the on-time outcome. It is used for the on-time likelihood when the entered line count is within the model's training range; otherwise the app withholds that score and still presents the capacity plan.
+The feasibility model uses historical worker headcount mapped to 17-operator line equivalents, shifts per day, order details, and `order_status` (`Accept`/`Reject`). The app withholds its recommendation if the saved model was trained against the old on-time target; run `python train.py` to create a compatible model. The capacity plan remains available independently.
 
 The N4 worker-operation regressor learns efficiency and quality from completed worker-operation allocations joined to worker and operation records. It uses order-grouped cross-validation to keep an order's allocations together. It is trained for research but is not used to assign lines in the live page because the checked-in worker and operation records are generated sample data, not a verified current roster.
 
@@ -42,7 +42,7 @@ The optional DNN uses TensorFlow/Keras Dense and Dropout layers. The GNN and GAN
 
 ## Dataset notes
 
-- `orders.csv` contains order details and `on_time_flag`, the fulfilment target. The training pipeline maps worker headcount to 17-operator line equivalents for line-model inputs.
+- `orders.csv` contains order details, `order_status` (`Accept`/`Reject`, the feasibility classification target), and `on_time_flag` (observed on-time outcome). The training pipeline maps worker headcount to 17-operator line equivalents for classifier inputs.
 - `interventions.csv` contains scenario selection and estimated cost targets for N2.
 - `allocations.csv` supplies typical conflict and worker-efficiency context. Its order-specific assignments are made after an order is accepted, so those fields are not used as live N1 inputs.
 - `workers.csv`, `machines_shifts.csv`, and `operations.csv` do not currently have a reliable order/date join to the fulfilment target, so they are not direct line-model inputs.
@@ -51,7 +51,7 @@ The optional DNN uses TensorFlow/Keras Dense and Dropout layers. The GNN and GAN
 
 The form fields mean order quantity in pieces, handover time in days, sewing lines that can be staffed on each shift, SMV in minutes per piece, order value in LKR, style, and priority. This factory's shift count is fixed at two. The capacity plan assumes each active line-shift meets the 17-operator grade standard; it does not know who is actually present.
 
-For capacity and delivery training, populate `orders.csv` with one row per completed order and these fields at minimum: `order_id`, `order_date`, `actual_completion_date`, `order_quantity`, `actual_completed_qty`, `handover_days`, `required_smv_total`, `style_id`, `n_available_workers`, `n_shifts` (1 or 2), `shift_hours`, and `on_time_flag`. Keep dates and quantities from actual production records. At least 30 completed orders per style are used for style-specific ranges; otherwise the planner falls back to all styles.
+For model training, populate `orders.csv` with these fields at minimum: `order_id`, `order_quantity`, `handover_days`, `required_smv_total`, `order_value`, `style_id`, `priority`, `n_available_workers`, `n_shifts` (1 or 2), `shift_hours`, and `order_status` (`Accept`/`Reject` recorded at the time the order decision was made). `on_time_flag` should remain the separate observed delivery outcome. Keep actual decisions and outcomes separate; do not infer real acceptance decisions from whether an order was delivered on time.
 
 `interventions.csv` should contain actual trial or chosen scenarios, their added workers, overtime, machines, outsourced quantity, selection outcome, and actual itemized costs. The `Current` scenario deliberately has zero *additional* resources and zero incremental cost. It does not represent total wages or say current staffing is adequate. Do not train or report its historical choice score as a delivery-success probability.
 

@@ -49,6 +49,8 @@ from model_features import (
     make_intervention_features,
 )
 from line_model_features import (
+    FEASIBILITY_ACCEPT_THRESHOLD,
+    FEASIBILITY_MODEL_TARGET,
     LINE_MODEL_FEATURES,
     historical_line_count,
     make_line_features,
@@ -78,8 +80,8 @@ N1_FEATURES = [
 ]
 
 
-def classification_metrics(y_true, probabilities):
-    predictions = (probabilities >= 0.5).astype(int)
+def classification_metrics(y_true, probabilities, threshold=0.5):
+    predictions = (probabilities >= threshold).astype(int)
     return {
         "accuracy": round(float(accuracy_score(y_true, predictions)), 4),
         "precision": round(float(precision_score(y_true, predictions, zero_division=0)), 4),
@@ -205,7 +207,7 @@ save_classifier_bundle(
 # the same inferred profile used at prediction time. Grouped folds keep all six
 # scenarios for an order on the same side of each validation split.
 order_features = {
-    int(row.order_id): build_order_features(
+    int(float(row.order_id)): build_order_features(
         row.order_quantity, row.handover_days, row.required_smv_total,
         row.order_value, row.style_id, row.priority, profile,
     )
@@ -325,19 +327,22 @@ for model_name, metrics in cost_scores.items():
 cost_model = cost_models[cost_name].fit(X2, scenario_training["total_cost"].to_numpy())
 joblib.dump(cost_model, "models/best_cost_model.pkl")
 
-# N3: line-aware order completion probability. Historical worker counts are
-# mapped to full line equivalents using the poster's 17-operator line mix.
-line_orders = orders[pd.to_numeric(orders["n_shifts"], errors="coerce").le(FACTORY_SHIFTS_PER_DAY)]
+# N3: line-aware accept/reject feasibility classifier. Historical worker
+# counts are mapped to 17-operator line equivalents using the factory standard.
+line_orders = orders[
+    pd.to_numeric(orders["n_shifts"], errors="coerce").le(FACTORY_SHIFTS_PER_DAY)
+    & orders["order_status"].isin(["Accept", "Reject"])
+]
 line_feature_rows = []
 for row in line_orders.itertuples():
     line_count = historical_line_count(row.n_available_workers)
     line_feature_rows.append(make_line_features(
         row.order_quantity, row.handover_days, row.required_smv_total,
-        row.order_value, row.style_id, row.priority, line_count, row.n_shifts,
-        row.shift_hours,
+        row.order_value, row.style_id, row.priority, line_count, int(float(row.n_shifts)),
+        float(row.shift_hours),
     ))
 X3 = pd.DataFrame(line_feature_rows, columns=LINE_MODEL_FEATURES)
-y3 = line_orders["on_time_flag"].astype(int).to_numpy()
+y3 = line_orders["order_status"].eq("Accept").astype(int).to_numpy()
 line_model = make_pipeline(
     StandardScaler(),
     LogisticRegression(C=0.8, max_iter=2000, random_state=SEED),
@@ -346,10 +351,12 @@ line_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 line_oof = cross_val_predict(
     line_model, X3, y3, cv=line_cv, method="predict_proba", n_jobs=1
 )[:, 1]
-line_metrics = classification_metrics(y3, line_oof)
+line_metrics = classification_metrics(y3, line_oof, FEASIBILITY_ACCEPT_THRESHOLD)
 line_model.fit(X3, y3)
 joblib.dump({
-    "name": "Line-aware Logistic Regression",
+    "name": "Feasibility Logistic Regression",
+    "target": FEASIBILITY_MODEL_TARGET,
+    "accept_threshold": FEASIBILITY_ACCEPT_THRESHOLD,
     "model": line_model,
     "features": LINE_MODEL_FEATURES,
     "training_ranges": {

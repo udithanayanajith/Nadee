@@ -7,6 +7,7 @@ import joblib
 import pandas as pd
 from historical_capacity import build_historical_capacity_plan
 from line_model_features import (
+    FEASIBILITY_MODEL_TARGET,
     LINE_MODEL_FEATURES,
     historical_line_count,
     make_line_features,
@@ -43,6 +44,9 @@ def _load_bundle(path):
 
 capacity_model = _load_bundle("models/line_shift_capacity_model.pkl")
 line_model = _load_bundle("models/line_feasibility_model.pkl")
+if line_model and line_model.get("target") != FEASIBILITY_MODEL_TARGET:
+    # Do not present the previous on-time model as an Accept/Reject classifier.
+    line_model = None
 if line_model:
     training_orders = orders_data[
         pd.to_numeric(orders_data["n_shifts"], errors="coerce").le(FACTORY_SHIFTS_PER_DAY)

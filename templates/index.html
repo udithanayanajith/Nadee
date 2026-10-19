@@ -34,7 +34,7 @@
     <section class="card">
         <div class="eyebrow">Smart Apparel · Planning assistant</div>
         <h1>Check an order before you accept it</h1>
-        <p class="intro">Enter the order details and available sewing lines. The planner uses this factory's two shifts automatically and estimates delivery risk, production capacity, staffing requirements and intervention costs.</p>
+        <p class="intro">Enter the order details and available sewing lines. The planner uses this factory's two shifts automatically and recommends whether to accept the order, then shows production capacity, staffing requirements and intervention costs.</p>
 
         {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
 
@@ -90,7 +90,7 @@
 
             <div class="info">
                 <span aria-hidden="true">ℹ️</span>
-                <div><strong>What the system calculates</strong>On-time likelihood for the entered line count and two shifts; intervention cost comparisons; expected production ranges and a staffing requirement plan.</div>
+                <div><strong>What the system calculates</strong>Accept/Reject probability for the entered line count and two shifts; intervention cost comparisons; expected production ranges and a staffing requirement plan.</div>
             </div>
             <button type="submit">Calculate order feasibility <span aria-hidden="true">→</span></button>
         </form>

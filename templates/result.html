@@ -47,18 +47,18 @@
 
     <section class="card summary">
         <div>
-            <div style="color:#64748b">On-time likelihood for entered capacity</div>
+            <div style="color:#64748b">Predicted order feasibility</div>
             {% if n1_analysis.available %}
             <div class="prob">{{ "%.2f"|format(n1_analysis.percent) }}%</div>
-            <div style="color:#64748b">Estimated likelihood · {{ production_plan.available_lines }} lines · {{ production_plan.factory_shifts_per_day }} shifts</div>
+            <div style="color:#64748b">Chance of acceptance in similar records · {{ production_plan.available_lines }} lines · {{ production_plan.factory_shifts_per_day }} shifts</div>
             {% if n1_analysis.extrapolation_note %}<div class="assumption" style="margin-top:12px">{{ n1_analysis.extrapolation_note }}</div>{% endif %}
             {% else %}
             <div style="margin:10px 0;color:#64748b">{{ n1_analysis.message }}</div>
             {% endif %}
-            <span class="badge {% if decision.startswith('CAPACITY FIT') %}ACCEPT{% elif decision.startswith('TIGHT') %}INTERV{% else %}REJECT{% endif %}">{{ decision }}</span>
-            <div style="margin-top:5px;color:#64748b;font-size:12px">Line-capacity decision</div>
+            <span class="badge {% if n1_analysis.available and n1_analysis.decision.startswith('Accept') %}ACCEPT{% else %}REJECT{% endif %}">{{ n1_analysis.decision if n1_analysis.available else 'Decision unavailable' }}</span>
+            <div style="margin-top:5px;color:#64748b;font-size:12px">Order acceptance recommendation</div>
         </div>
-        <div style="max-width:440px;color:#64748b">{{ production_plan.capacity_source }}. The likelihood model uses the entered lines and the factory's two shifts. The recommended capacity decision below is based on the production range.</div>
+        <div style="max-width:440px;color:#64748b">{{ production_plan.capacity_source }}. The acceptance probability learns from past order decisions. The capacity plan below separately estimates whether planned output can meet the deadline.</div>
     </section>
 
     <section class="card">
@@ -79,16 +79,16 @@
     </section>
 
     <section class="card" id="n1-feasibility">
-        <h2>Delivery likelihood for the selected line capacity</h2>
+        <h2>Accept or reject recommendation</h2>
         {% if n1_analysis.available %}
         <div class="stats">
-            <div class="stat"><span>Predicted on-time likelihood</span><strong>{{ "%.2f"|format(n1_analysis.percent) }}%</strong></div>
+            <div class="stat"><span>Predicted acceptance probability</span><strong>{{ "%.2f"|format(n1_analysis.percent) }}%</strong></div>
             <div class="stat"><span>Model</span><strong>{{ n1_analysis.model_name }}</strong></div>
             {% if n1_analysis.validation_auc is not none %}<div class="stat"><span>Model validation ROC-AUC</span><strong>{{ "%.3f"|format(n1_analysis.validation_auc) }}</strong></div>{% endif %}
             {% if n1_analysis.validation_brier is not none %}<div class="stat"><span>Model validation Brier score</span><strong>{{ "%.3f"|format(n1_analysis.validation_brier) }}</strong></div>{% endif %}
             <div class="stat"><span>Model interpretation</span><strong>{{ n1_analysis.decision }}</strong></div>
         </div>
-        <p class="assumption">{{ n1_analysis.scope_note }} A low likelihood does not block the capacity plan; the plan shows the recommended staffing scenario and flags when it misses the handover target.</p>
+        <p class="assumption">{{ n1_analysis.scope_note }} The sample decision history is generated and illustrative. Replace it with recorded factory Accept/Reject decisions to get reliable probabilities. The separate capacity plan shows the production resources and output needed to meet the deadline.</p>
         {% else %}
         <p class="assumption">{{ n1_analysis.message }}</p>
         {% endif %}
