@@ -13,6 +13,25 @@ The order form takes these values:
 
 The live result uses a logistic regression classifier trained on `order_status` Accept/Reject decisions, N2 intervention/cost comparisons, and the N5 line-shift production plan. Synthetic `order_status` values are sampled from a smooth acceptance rate based on the same planned line-capacity features, so the sample classifier has uncertainty instead of learning a hard 0%/100% rule. `on_time_flag` remains the separate observed delivery outcome. The live recommendation uses a 70% predicted acceptance-probability cutoff; the production plan separately estimates output and required line-shifts. Replace the generated decisions with actual factory accept/reject records before relying on probabilities.
 
+## New laptop setup (Windows)
+
+Use 64-bit Python 3.11 to match the Python version shown by the supplied package freeze. From PowerShell in the project folder:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+The packages in `requirements.txt` run the web app and notebook. To include the optional TensorFlow DNN used during model training, install the extended set instead:
+
+```powershell
+python -m pip install -r requirements-neural.txt
+```
+
+Then run `python app.py` for the web app, or `python train.py` to retrain models. The project does not import PyTorch, so the `torch`, `torchvision`, `torchaudio` and CUDA packages in the supplied full `pip freeze` are not needed. TensorFlow 2.20 on native Windows is CPU-only; TensorFlow GPU use on Windows requires WSL2.
+
 ## Train
 
 ```powershell
